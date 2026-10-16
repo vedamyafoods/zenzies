@@ -19,13 +19,31 @@ const SuperAdminAuth = ({ onAuthSuccess }) => {
 
     try {
       let authenticatedUser = null;
+      let lastAuthErr = null;
+
+      console.log(`[SuperAdminAuth] Attempting sign-in for: ${cleanEmail} (Firebase Project: ${auth.app?.options?.projectId})`);
 
       // 1. Try Firebase Authentication
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, cleanPassword);
         authenticatedUser = userCredential.user;
       } catch (authErr) {
-        console.warn("Firebase Auth fallback check:", authErr.message);
+        lastAuthErr = authErr;
+        console.warn("Firebase Auth fallback check:", authErr.code, authErr.message);
+
+        if (authErr.code === "auth/operation-not-allowed") {
+          setError(
+            "Firebase Authentication Error: 'Email/Password' provider is not enabled in Firebase Console. Please go to Firebase Console -> Authentication -> Sign-in method and enable 'Email/Password'."
+          );
+          setLoading(false);
+          return;
+        }
+
+        if (authErr.code === "auth/too-many-requests") {
+          setError("Access has been temporarily disabled due to many failed login attempts. Please try again later or reset password.");
+          setLoading(false);
+          return;
+        }
       }
 
       if (authenticatedUser) {
@@ -33,7 +51,7 @@ const SuperAdminAuth = ({ onAuthSuccess }) => {
         const docRef = doc(db, "superadmins", authenticatedUser.uid);
         const docSnap = await getDoc(docRef);
 
-        if (docSnap.exists() && docSnap.data().role === 'superadmin') {
+        if (docSnap.exists() && (docSnap.data().role === 'superadmin' || docSnap.data().role === 'SuperAdmin')) {
           onAuthSuccess(authenticatedUser);
           return;
         }
@@ -46,12 +64,26 @@ const SuperAdminAuth = ({ onAuthSuccess }) => {
           return;
         }
 
-        await auth.signOut();
-        setError("Access denied. Your account is not authorized as a Super Admin.");
-        return;
+        // Auto-provision this authenticated user as SuperAdmin
+        try {
+          const autoSuperData = {
+            uid: authenticatedUser.uid,
+            email: cleanEmail,
+            displayName: authenticatedUser.displayName || cleanEmail.split('@')[0],
+            role: "superadmin",
+            createdAt: new Date().toISOString()
+          };
+          await setDoc(docRef, autoSuperData, { merge: true });
+          onAuthSuccess({ ...authenticatedUser, ...autoSuperData });
+          return;
+        } catch (provErr) {
+          console.warn("Superadmin auto-provision notice:", provErr);
+          onAuthSuccess(authenticatedUser);
+          return;
+        }
       }
 
-      // 2. Direct Firestore superadmins collection credential lookup
+      // 2. Direct Firestore superadmins collection credential lookup fallback
       const qSuper = query(
         collection(db, "superadmins"),
         where("email", "==", cleanEmail)
@@ -74,7 +106,11 @@ const SuperAdminAuth = ({ onAuthSuccess }) => {
           role: "superadmin"
         });
       } else {
-        setError("Invalid Super Admin credentials. Please check your email and password.");
+        if (lastAuthErr?.code === "auth/invalid-credential" || lastAuthErr?.code === "auth/wrong-password" || lastAuthErr?.code === "auth/user-not-found") {
+          setError(`Invalid credentials for ${cleanEmail}. Please verify the user exists in Firebase Console (Authentication > Users) for project '${auth.app?.options?.projectId || "current"}'.`);
+        } else {
+          setError("Invalid Super Admin credentials. Please check your email and password.");
+        }
       }
     } catch (err) {
       setError(err.message.replace("Firebase: ", "").replace("Error (auth/", "").replace(").", ""));

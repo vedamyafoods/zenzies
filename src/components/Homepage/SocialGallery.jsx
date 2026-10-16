@@ -41,6 +41,10 @@ const SocialGallery = () => {
 
   if (!isEnabled) return null;
 
+  const eyebrow = design.eyebrow || 'FOLLOW @ZENZIES';
+  const title = design.title || 'Join Our Shining Community';
+  const instagramUrl = design.instagramUrl || design.instagramLink || 'https://www.instagram.com';
+
   return (
     <section style={containerStyle} className="relative w-full border-b border-[#E8DDD2]">
       {overlayStyle && (
@@ -51,16 +55,22 @@ const SocialGallery = () => {
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
           <div className="space-y-1 text-left">
-            <span className="text-[11px] font-sans font-semibold tracking-[0.22em] text-[#956638] uppercase">
-              FOLLOW @ZENZIES
+            <span
+              className="text-[11px] font-sans font-semibold tracking-[0.22em] uppercase"
+              style={{ color: design.accentColor || '#956638' }}
+            >
+              {eyebrow}
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-[40px] text-[#211A16] font-normal leading-tight">
-              Join Our Shining Community
+            <h2
+              className="font-serif text-3xl sm:text-4xl lg:text-[40px] font-normal leading-tight"
+              style={{ color: design.titleColor || '#211A16' }}
+            >
+              {title}
             </h2>
           </div>
 
           <a
-            href="https://www.instagram.com"
+            href={instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-sans font-semibold text-[#211A16] hover:text-[#956638] transition-colors group self-start sm:self-end"

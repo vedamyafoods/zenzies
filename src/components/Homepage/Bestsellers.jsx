@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import { Loader2, Heart, ChevronLeft, ChevronRight, Star, ShoppingBag, ArrowRight } from 'lucide-react';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../Firebase';
 import { useStore } from '../../hooks/useStore';
 import AddToCartModal from '../AddToCartModal';
@@ -96,31 +96,39 @@ const BestSellers = () => {
   });
 
   useEffect(() => {
-    const fetchBestsellers = async () => {
-      try {
-        const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          const filtered = list.filter(isBestsellerProduct);
-          if (filtered.length >= 2) {
-            setProducts(filtered);
-          } else if (list.length > 0) {
-            setProducts(list.slice(0, 8));
+    let unsub = () => {};
+    try {
+      const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+      unsub = onSnapshot(
+        q,
+        (snap) => {
+          if (!snap.empty) {
+            const list = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            const filtered = list.filter(isBestsellerProduct);
+            if (filtered.length >= 2) {
+              setProducts(filtered);
+            } else if (list.length > 0) {
+              setProducts(list.slice(0, 8));
+            } else {
+              setProducts(fallbackBestsellers);
+            }
           } else {
             setProducts(fallbackBestsellers);
           }
-        } else {
+          setLoading(false);
+        },
+        (err) => {
+          console.warn("Bestsellers realtime snapshot notice, using fallback:", err);
           setProducts(fallbackBestsellers);
+          setLoading(false);
         }
-      } catch (e) {
-        console.warn("Bestsellers fetch notice, using fallback:", e);
-        setProducts(fallbackBestsellers);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBestsellers();
+      );
+    } catch (e) {
+      console.warn("Bestsellers query error, using fallback:", e);
+      setProducts(fallbackBestsellers);
+      setLoading(false);
+    }
+    return () => unsub();
   }, []);
 
   const { addToWishlist, isInWishlist, addToCart } = useStore();

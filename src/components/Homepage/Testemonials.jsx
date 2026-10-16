@@ -81,6 +81,9 @@ const TestimonialSection = () => {
 
   if (!isEnabled) return null;
 
+  const eyebrow = design.eyebrow || 'WHAT OUR CUSTOMERS SAY';
+  const title = design.title || 'Loved by Thousands';
+
   return (
     <section style={containerStyle} className="relative w-full border-b border-[#E8DDD2]">
       {overlayStyle && (
@@ -91,11 +94,17 @@ const TestimonialSection = () => {
         {/* Section Header */}
         <div className="flex items-end justify-between mb-8 sm:mb-10">
           <div className="space-y-1 text-left">
-            <span className="text-[11px] font-sans font-semibold tracking-[0.22em] text-[#956638] uppercase">
-              WHAT OUR CUSTOMERS SAY
+            <span
+              className="text-[11px] font-sans font-semibold tracking-[0.22em] uppercase"
+              style={{ color: design.accentColor || '#956638' }}
+            >
+              {eyebrow}
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-[40px] text-[#211A16] font-normal leading-tight">
-              Loved by Thousands
+            <h2
+              className="font-serif text-3xl sm:text-4xl lg:text-[40px] font-normal leading-tight"
+              style={{ color: design.titleColor || '#211A16' }}
+            >
+              {title}
             </h2>
           </div>
 

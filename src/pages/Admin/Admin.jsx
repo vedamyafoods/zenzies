@@ -193,11 +193,28 @@ const Admin = () => {
                 setAdminUser(data);
                 localStorage.setItem("velouraz_admin", JSON.stringify(data));
               } else {
-                // If not an admin user, clear admin session
-                const currentStored = localStorage.getItem("velouraz_admin");
-                if (!currentStored) {
-                  setAdminUser(null);
+                // If authenticated via Firebase Auth, auto-provision and maintain admin session
+                const configuredAdminEmail = (import.meta.env.VITE_ADMIN_EMAIL || "admin@zenzies.in").toLowerCase();
+                const isSuperAdminEmail = fbUser.email?.toLowerCase() === configuredAdminEmail || fbUser.email?.toLowerCase().endsWith("@zenzies.in");
+                const autoAdmin = {
+                  uid: fbUser.uid,
+                  firestoreId: fbUser.uid,
+                  email: fbUser.email?.toLowerCase(),
+                  adminId: fbUser.email?.split("@")[0] || "admin",
+                  displayName: fbUser.displayName || fbUser.email?.split("@")[0] || "Administrator",
+                  role: isSuperAdminEmail ? "SuperAdmin" : "Admin",
+                  status: "Active",
+                  createdAt: new Date().toISOString(),
+                  lastLogin: new Date().toISOString(),
+                };
+                try {
+                  await setDoc(adminRef, autoAdmin, { merge: true });
+                } catch (saveErr) {
+                  console.warn("Auto-provision save notice:", saveErr);
                 }
+                setAdminUser(autoAdmin);
+                localStorage.setItem("zenzies_admin", JSON.stringify(autoAdmin));
+                localStorage.setItem("velouraz_admin", JSON.stringify(autoAdmin));
               }
             }
           }

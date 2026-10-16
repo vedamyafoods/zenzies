@@ -112,6 +112,12 @@ const CategorySection = () => {
 
   if (!isEnabled) return null;
 
+  const eyebrow = design.eyebrow || 'SHOP BY CATEGORY';
+  const title = design.title || 'Find Your Perfect Piece';
+  const subtitle = design.subtitle || 'Explore our curated collections for every occasion.';
+  const viewAllText = design.viewAllText || 'View All Categories';
+  const viewAllLink = design.viewAllLink || '/shop';
+
   return (
     <section
       style={{
@@ -132,26 +138,35 @@ const CategorySection = () => {
 
           {/* Centered Editorial Header Content */}
           <div className="text-center space-y-2 max-w-2xl mx-auto px-4">
-            <span className="font-sans text-[11px] sm:text-[12px] font-semibold tracking-[0.24em] text-[#956638] uppercase block">
-              SHOP BY CATEGORY
+            <span
+              className="font-sans text-[11px] sm:text-[12px] font-semibold tracking-[0.24em] uppercase block"
+              style={{ color: design.accentColor || '#956638' }}
+            >
+              {eyebrow}
             </span>
 
-            <h2 className="font-serif text-[32px] sm:text-[38px] lg:text-[42px] text-[#211A16] font-medium leading-[1.1] tracking-tight m-0">
-              Find Your Perfect Piece
+            <h2
+              className="font-serif text-[32px] sm:text-[38px] lg:text-[42px] font-medium leading-[1.1] tracking-tight m-0"
+              style={{ color: design.titleColor || '#211A16' }}
+            >
+              {title}
             </h2>
 
-            <p className="font-sans text-[13.5px] sm:text-[14.5px] text-[#62564B] font-normal leading-relaxed max-w-lg mx-auto pt-1">
-              Explore our curated collections for every occasion.
+            <p
+              className="font-sans text-[13.5px] sm:text-[14.5px] font-normal leading-relaxed max-w-lg mx-auto pt-1"
+              style={{ color: design.subtitleColor || '#62564B' }}
+            >
+              {subtitle}
             </p>
           </div>
 
           {/* View All Categories Link: Right-aligned on desktop, subtle arrow transition */}
           <div className="mt-3 sm:mt-0 sm:absolute sm:right-0 sm:bottom-0 flex justify-center sm:justify-end">
             <Link
-              to="/shop"
+              to={viewAllLink}
               className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-sans font-medium text-[#65472D] hover:text-[#956638] transition-colors duration-200 group py-1"
             >
-              <span>View All Categories</span>
+              <span>{viewAllText}</span>
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-200" />
             </Link>
           </div>

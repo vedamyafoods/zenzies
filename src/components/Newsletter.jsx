@@ -38,6 +38,13 @@ const Newsletter = () => {
 
   if (!isEnabled) return null;
 
+  const title = design.title || 'Get Exclusive Offers';
+  const subtitle = design.subtitle || 'Subscribe and be the first to know about new collections, special offers and smart jewellery storage tips.';
+  const btnText = design.btnText || 'Subscribe';
+  const giftImage = design.image || GIFT_IMG;
+  const scriptLine1 = design.scriptLine1 || 'A Brighter Tomorrow';
+  const scriptLine2 = design.scriptLine2 || 'Starts Here ♡';
+
   return (
     <section style={containerStyle} className="relative w-full border-b border-[#DFCBB9] overflow-hidden">
       {overlayStyle && (
@@ -48,11 +55,17 @@ const Newsletter = () => {
 
           {/* Left Column: Copy & Input Form */}
           <div className="lg:col-span-7 space-y-4 text-left">
-            <h2 className="font-serif text-3xl sm:text-4xl text-[#211A16] font-normal leading-tight">
-              Get Exclusive Offers
+            <h2
+              className="font-serif text-3xl sm:text-4xl font-normal leading-tight"
+              style={{ color: design.titleColor || '#211A16' }}
+            >
+              {title}
             </h2>
-            <p className="text-xs sm:text-sm text-[#6B5E52] font-sans leading-relaxed max-w-lg">
-              Subscribe and be the first to know about new collections, special offers and smart jewellery storage tips.
+            <p
+              className="text-xs sm:text-sm font-sans leading-relaxed max-w-lg"
+              style={{ color: design.subtitleColor || '#6B5E52' }}
+            >
+              {subtitle}
             </p>
 
             <AnimatePresence mode="wait">
@@ -78,13 +91,14 @@ const Newsletter = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-3 sm:py-3.5 rounded-[6px] bg-[#956638] hover:bg-[#7D532B] text-white text-xs sm:text-sm font-sans font-semibold tracking-wide transition-all shadow-xs shrink-0 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                    className="px-6 py-3 sm:py-3.5 rounded-[6px] text-white text-xs sm:text-sm font-sans font-semibold tracking-wide transition-all shadow-xs shrink-0 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                    style={{ backgroundColor: design.btnBgColor || design.accentColor || '#956638' }}
                   >
                     {loading ? (
                       <Loader2 size={14} className="animate-spin" />
                     ) : (
                       <>
-                        <span>Subscribe</span>
+                        <span>{btnText}</span>
                         <ArrowRight size={13} />
                       </>
                     )}
@@ -98,7 +112,7 @@ const Newsletter = () => {
           <div className="lg:col-span-5 relative flex items-center justify-center lg:justify-end">
             <div className="relative rounded-2xl overflow-hidden shadow-sm border border-[#DFCBB9] bg-white aspect-[4/2.6] sm:aspect-[4/2.4] w-full max-w-md">
               <img
-                src={GIFT_IMG}
+                src={giftImage}
                 alt="Zenzies Special Gift"
                 className="w-full h-full object-cover object-center"
               />
@@ -107,10 +121,10 @@ const Newsletter = () => {
               {/* Script Overlay */}
               <div className="absolute bottom-4 right-4 z-10 text-right drop-shadow-md pointer-events-none">
                 <p className="text-xl sm:text-2xl text-white font-script leading-tight" style={{ textShadow: '0 2px 5px rgba(0,0,0,0.5)' }}>
-                  A Brighter Tomorrow
+                  {scriptLine1}
                 </p>
                 <p className="text-lg sm:text-xl text-white/95 font-script -mt-1" style={{ textShadow: '0 2px 5px rgba(0,0,0,0.5)' }}>
-                  Starts Here ♡
+                  {scriptLine2}
                 </p>
               </div>
             </div>

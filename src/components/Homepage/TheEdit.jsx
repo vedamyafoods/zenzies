@@ -13,6 +13,22 @@ const TheEdit = () => {
 
   if (!isEnabled) return null;
 
+  const banner1 = {
+    eyebrow: design.banner1Eyebrow || design.banner1?.eyebrow || 'CURATED COMBOS',
+    title: design.banner1Title || design.banner1?.title || "Crafted for Life's Special Moments",
+    btnText: design.banner1BtnText || design.banner1?.btnText || 'Explore Bundles',
+    btnLink: design.banner1BtnLink || design.banner1?.btnLink || '/shop?category=Bundles',
+    image: design.banner1Image || design.banner1?.image || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&q=80&w=900',
+  };
+
+  const banner2 = {
+    eyebrow: design.banner2Eyebrow || design.banner2?.eyebrow || 'GIFT SETS',
+    title: design.banner2Title || design.banner2?.title || 'A Gift That Lasts Forever',
+    btnText: design.banner2BtnText || design.banner2?.btnText || 'Shop Gifts',
+    btnLink: design.banner2BtnLink || design.banner2?.btnLink || '/shop?category=Jewellery+Boxes',
+    image: design.banner2Image || design.banner2?.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&q=80&w=900',
+  };
+
   return (
     <section style={containerStyle} className="relative w-full border-b border-[#E8DDD2]">
       {overlayStyle && (
@@ -31,8 +47,8 @@ const TheEdit = () => {
           >
             {/* Background Image */}
             <img
-              src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&q=80&w=900"
-              alt="Crafted for Life's Special Moments"
+              src={banner1.image}
+              alt={banner1.title}
               loading="lazy"
               decoding="async"
               className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
@@ -43,16 +59,16 @@ const TheEdit = () => {
             {/* Banner Content */}
             <div className="relative z-10 max-w-xs space-y-4">
               <span className="text-[11px] font-sans font-semibold tracking-[0.2em] text-[#E9D9C7] uppercase block">
-                CURATED COMBOS
+                {banner1.eyebrow}
               </span>
               <h3 className="font-serif text-2xl sm:text-3xl lg:text-[34px] text-white font-normal leading-tight">
-                Crafted for Life's Special Moments
+                {banner1.title}
               </h3>
               <Link
-                to="/shop?category=Bundles"
+                to={banner1.btnLink}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[6px] bg-white hover:bg-[#FBF7F2] text-[#211A16] hover:text-[#956638] text-xs font-sans font-semibold tracking-wide transition-all shadow-sm"
               >
-                <span>Explore Bundles</span>
+                <span>{banner1.btnText}</span>
                 <ArrowRight size={13} />
               </Link>
             </div>
@@ -68,8 +84,8 @@ const TheEdit = () => {
           >
             {/* Background Image */}
             <img
-              src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&q=80&w=900"
-              alt="A Gift That Lasts Forever"
+              src={banner2.image}
+              alt={banner2.title}
               loading="lazy"
               decoding="async"
               className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
@@ -80,16 +96,16 @@ const TheEdit = () => {
             {/* Banner Content */}
             <div className="relative z-10 max-w-xs space-y-4">
               <span className="text-[11px] font-sans font-semibold tracking-[0.2em] text-[#E9D9C7] uppercase block">
-                GIFT SETS
+                {banner2.eyebrow}
               </span>
               <h3 className="font-serif text-2xl sm:text-3xl lg:text-[34px] text-white font-normal leading-tight">
-                A Gift That Lasts Forever
+                {banner2.title}
               </h3>
               <Link
-                to="/shop?category=Jewellery+Boxes"
+                to={banner2.btnLink}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[6px] bg-white hover:bg-[#FBF7F2] text-[#211A16] hover:text-[#956638] text-xs font-sans font-semibold tracking-wide transition-all shadow-sm"
               >
-                <span>Shop Gifts</span>
+                <span>{banner2.btnText}</span>
                 <ArrowRight size={13} />
               </Link>
             </div>

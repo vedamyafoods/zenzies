@@ -48,7 +48,13 @@ const DEFAULT_SECTION_DESIGNS = {
     backgroundColor: '#FFFFFF',
     paddingTop: '48px',
     paddingBottom: '48px',
+    eyebrow: 'SHOP BY CATEGORY',
+    title: 'Find Your Perfect Piece',
+    subtitle: 'Explore our curated collections for every occasion.',
+    viewAllText: 'View All Categories',
+    viewAllLink: '/shop',
     titleColor: '#211A16',
+    subtitleColor: '#62564B',
     accentColor: '#956638',
   },
   jewellery_box_banner: {
@@ -126,12 +132,35 @@ const DEFAULT_SECTION_DESIGNS = {
     paddingBottom: '48px',
     titleColor: '#FFFFFF',
     accentColor: '#956638',
+    banner1Eyebrow: 'CURATED COMBOS',
+    banner1Title: "Crafted for Life's Special Moments",
+    banner1BtnText: 'Explore Bundles',
+    banner1BtnLink: '/shop?category=Bundles',
+    banner1Image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&q=80&w=900',
+    banner2Eyebrow: 'GIFT SETS',
+    banner2Title: 'A Gift That Lasts Forever',
+    banner2BtnText: 'Shop Gifts',
+    banner2BtnLink: '/shop?category=Jewellery+Boxes',
+    banner2Image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&q=80&w=900',
   },
   brand_story: {
     enabled: true,
     backgroundColor: '#FFFFFF',
     paddingTop: '64px',
     paddingBottom: '64px',
+    eyebrow: 'OUR STORY',
+    title: 'A Legacy of Grace\nand Thoughtful Storage',
+    description: "At Zenzies, we believe jewellery is more than an accessory — it's a symbol of love, confidence, and life's most cherished memories. Every piece of jewellery and organizer box is thoughtfully designed to ensure your treasured treasures remain beautifully organized, tangle-free, and protected for years to come.",
+    btnText: 'Read Our Story',
+    btnLink: '/about',
+    btnEnabled: true,
+    btnBgColor: '#956638',
+    image: 'https://images.unsplash.com/photo-1531995811006-35cb42e1a022?auto=format&fit=crop&q=80&w=900',
+    scriptLine1: 'Handcrafted',
+    scriptLine2: 'With Love ♡',
+    badgeTitle: 'ZENZIES',
+    badgeYear: 'EST. 2024',
+    badgeSubtitle: 'Authentic Care',
     titleColor: '#211A16',
     subtitleColor: '#6B5E52',
     accentColor: '#956638',
@@ -141,15 +170,21 @@ const DEFAULT_SECTION_DESIGNS = {
     backgroundColor: '#FBF7F2',
     paddingTop: '48px',
     paddingBottom: '48px',
+    eyebrow: 'WHAT OUR CUSTOMERS SAY',
+    title: 'Loved by Thousands',
     titleColor: '#211A16',
     cardBackgroundColor: '#FFFFFF',
     cardBorderColor: '#E8DDD2',
+    accentColor: '#956638',
   },
   social_gallery: {
     enabled: true,
     backgroundColor: '#FFFFFF',
     paddingTop: '48px',
     paddingBottom: '48px',
+    eyebrow: 'FOLLOW @ZENZIES',
+    title: 'Join Our Shining Community',
+    instagramUrl: 'https://www.instagram.com',
     titleColor: '#211A16',
     accentColor: '#956638',
   },
@@ -158,6 +193,13 @@ const DEFAULT_SECTION_DESIGNS = {
     backgroundColor: '#E9D9C7',
     paddingTop: '48px',
     paddingBottom: '48px',
+    title: 'Get Exclusive Offers',
+    subtitle: 'Subscribe and be the first to know about new collections, special offers and smart jewellery storage tips.',
+    btnText: 'Subscribe',
+    btnBgColor: '#956638',
+    image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&q=80&w=900',
+    scriptLine1: 'A Brighter Tomorrow',
+    scriptLine2: 'Starts Here ♡',
     titleColor: '#211A16',
     subtitleColor: '#6B5E52',
     accentColor: '#956638',
@@ -772,6 +814,142 @@ const HomepageDesignManager = ({ isDarkMode = false }) => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+              /* ─── LIVE PREVIEW VARIANT: Shop by Category ─── */
+              ) : selectedSection === 'category_grid' ? (
+                <div className="relative z-10 px-6 py-6 text-center space-y-3">
+                  <span className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase block" style={{ color: activeDesign.accentColor || '#956638' }}>
+                    {activeDesign.eyebrow || 'SHOP BY CATEGORY'}
+                  </span>
+                  <h4 className="font-serif text-2xl font-medium" style={{ color: activeDesign.titleColor || '#211A16' }}>
+                    {activeDesign.title || 'Find Your Perfect Piece'}
+                  </h4>
+                  <p className="text-xs font-sans max-w-sm mx-auto" style={{ color: activeDesign.subtitleColor || '#62564B' }}>
+                    {activeDesign.subtitle || 'Explore our curated collections for every occasion.'}
+                  </p>
+                  <div className="flex justify-center gap-4 pt-2">
+                    {['Rings', 'Necklaces', 'Earrings', 'Boxes'].map((cat, i) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-[#F3E4DA] border border-[#E8DDD2] flex items-center justify-center text-xs">💎</div>
+                        <span className="text-[10px] font-medium mt-1 text-[#211A16]">{cat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              /* ─── LIVE PREVIEW VARIANT: Promotional Banners ─── */
+              ) : selectedSection === 'promotional_banners' ? (
+                <div className="relative z-10 px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-4 rounded-xl border border-[#E8DDD2] bg-[#211A16]/80 text-white space-y-2 text-left">
+                    <span className="text-[9px] uppercase tracking-wider text-[#E9D9C7] font-bold block">
+                      {activeDesign.banner1Eyebrow || 'CURATED COMBOS'}
+                    </span>
+                    <h5 className="font-serif text-base">{activeDesign.banner1Title || "Crafted for Life's Special Moments"}</h5>
+                    <span className="inline-block px-3 py-1 bg-white text-[#211A16] rounded text-[10px] font-bold">
+                      {activeDesign.banner1BtnText || 'Explore Bundles'} →
+                    </span>
+                  </div>
+                  <div className="p-4 rounded-xl border border-[#E8DDD2] bg-[#211A16]/80 text-white space-y-2 text-left">
+                    <span className="text-[9px] uppercase tracking-wider text-[#E9D9C7] font-bold block">
+                      {activeDesign.banner2Eyebrow || 'GIFT SETS'}
+                    </span>
+                    <h5 className="font-serif text-base">{activeDesign.banner2Title || "A Gift That Lasts Forever"}</h5>
+                    <span className="inline-block px-3 py-1 bg-white text-[#211A16] rounded text-[10px] font-bold">
+                      {activeDesign.banner2BtnText || 'Shop Gifts'} →
+                    </span>
+                  </div>
+                </div>
+
+              /* ─── LIVE PREVIEW VARIANT: Brand Story ─── */
+              ) : selectedSection === 'brand_story' ? (
+                <div className="relative z-10 px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center text-left">
+                  <div className="space-y-2">
+                    <span className="text-[10px] uppercase tracking-wider font-bold" style={{ color: activeDesign.accentColor || '#956638' }}>
+                      {activeDesign.eyebrow || 'OUR STORY'}
+                    </span>
+                    <h4 className="font-serif text-xl leading-tight" style={{ color: activeDesign.titleColor || '#211A16' }}>
+                      {activeDesign.title || 'A Legacy of Grace and Thoughtful Storage'}
+                    </h4>
+                    <p className="text-xs line-clamp-3" style={{ color: activeDesign.subtitleColor || '#6B5E52' }}>
+                      {activeDesign.description || 'At Zenzies, we believe jewellery is more than an accessory...'}
+                    </p>
+                    <span className="inline-block px-3 py-1.5 rounded text-[11px] text-white font-bold" style={{ backgroundColor: activeDesign.btnBgColor || '#956638' }}>
+                      {activeDesign.btnText || 'Read Our Story'} →
+                    </span>
+                  </div>
+                  <div className="flex justify-center">
+                    <div className="w-36 h-40 rounded-t-[50px] rounded-b-xl border border-[#E8DDD2] bg-[#FAF6F0] overflow-hidden flex items-center justify-center">
+                      <span className="text-xs text-slate-400">Story Photo</span>
+                    </div>
+                  </div>
+                </div>
+
+              /* ─── LIVE PREVIEW VARIANT: Testimonials ─── */
+              ) : selectedSection === 'testimonials' ? (
+                <div className="relative z-10 px-6 py-4 space-y-3 text-left">
+                  <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: activeDesign.accentColor || '#956638' }}>
+                    {activeDesign.eyebrow || 'WHAT OUR CUSTOMERS SAY'}
+                  </span>
+                  <h4 className="font-serif text-xl" style={{ color: activeDesign.titleColor || '#211A16' }}>
+                    {activeDesign.title || 'Loved by Thousands'}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {['Priya S.', 'Megha K.', 'Rohan M.'].map((name, i) => (
+                      <div key={i} className="p-2.5 rounded-lg border border-[#E8DDD2] bg-white text-xs">
+                        <span className="text-amber-500 text-[10px]">★★★★★</span>
+                        <p className="text-[11px] italic mt-1 text-[#211A16]">"Stunning quality & great boxes!"</p>
+                        <p className="text-[10px] font-bold text-[#956638] mt-1">{name}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              /* ─── LIVE PREVIEW VARIANT: Social Gallery ─── */
+              ) : selectedSection === 'social_gallery' ? (
+                <div className="relative z-10 px-6 py-4 space-y-3">
+                  <div className="flex justify-between items-end text-left">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: activeDesign.accentColor || '#956638' }}>
+                        {activeDesign.eyebrow || 'FOLLOW @ZENZIES'}
+                      </span>
+                      <h4 className="font-serif text-xl" style={{ color: activeDesign.titleColor || '#211A16' }}>
+                        {activeDesign.title || 'Join Our Shining Community'}
+                      </h4>
+                    </div>
+                    <span className="text-xs text-[#956638] font-bold">Instagram →</span>
+                  </div>
+                  <div className="grid grid-cols-6 gap-1.5">
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                      <div key={i} className="aspect-square rounded bg-[#FAF6F0] border border-[#E8DDD2] flex items-center justify-center text-[10px] text-slate-400">
+                        📸
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              /* ─── LIVE PREVIEW VARIANT: Newsletter ─── */
+              ) : selectedSection === 'newsletter' ? (
+                <div className="relative z-10 px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center text-left">
+                  <div className="space-y-2">
+                    <h4 className="font-serif text-xl" style={{ color: activeDesign.titleColor || '#211A16' }}>
+                      {activeDesign.title || 'Get Exclusive Offers'}
+                    </h4>
+                    <p className="text-xs" style={{ color: activeDesign.subtitleColor || '#6B5E52' }}>
+                      {activeDesign.subtitle || 'Subscribe and be the first to know about new collections...'}
+                    </p>
+                    <div className="flex gap-1.5">
+                      <div className="px-3 py-1.5 bg-white border border-[#DFCBB9] rounded text-xs text-slate-400 flex-1">email@example.com</div>
+                      <span className="px-3 py-1.5 rounded text-xs text-white font-bold" style={{ backgroundColor: activeDesign.btnBgColor || '#956638' }}>
+                        {activeDesign.btnText || 'Subscribe'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex justify-center">
+                    <div className="w-36 h-24 rounded-xl border border-[#DFCBB9] bg-white flex items-center justify-center text-xs text-slate-400">
+                      🎁 Gift Image
+                    </div>
                   </div>
                 </div>
 
@@ -1392,6 +1570,711 @@ const HomepageDesignManager = ({ isDarkMode = false }) => {
                       </div>
                     </div>
 
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 0D. CATEGORY GRID SECTION CONTENT */}
+            {selectedSection === 'category_grid' && (
+              <div className={cardStyle}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('content')}
+                  className="w-full flex items-center justify-between text-left font-bold text-sm text-slate-800 dark:text-white cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText size={16} className="text-[#956638]" />
+                    <span>Category Section Headings & Navigation</span>
+                  </div>
+                  {openAccordion.content ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+
+                {openAccordion.content && (
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-4 space-y-4 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold mb-1">Eyebrow Text</label>
+                        <input
+                          type="text"
+                          value={activeDesign.eyebrow || 'SHOP BY CATEGORY'}
+                          onChange={(e) => updateActiveDesign('eyebrow', e.target.value)}
+                          className={inp}
+                          placeholder="SHOP BY CATEGORY"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Eyebrow Color</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={activeDesign.accentColor || '#956638'}
+                            onChange={(e) => updateActiveDesign('accentColor', e.target.value)}
+                            className="w-9 h-8 rounded border cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={activeDesign.accentColor || '#956638'}
+                            onChange={(e) => updateActiveDesign('accentColor', e.target.value)}
+                            className={inp}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold mb-1">Main Heading</label>
+                        <input
+                          type="text"
+                          value={activeDesign.title || 'Find Your Perfect Piece'}
+                          onChange={(e) => updateActiveDesign('title', e.target.value)}
+                          className={inp}
+                          placeholder="Find Your Perfect Piece"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Heading Color</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={activeDesign.titleColor || '#211A16'}
+                            onChange={(e) => updateActiveDesign('titleColor', e.target.value)}
+                            className="w-9 h-8 rounded border cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={activeDesign.titleColor || '#211A16'}
+                            onChange={(e) => updateActiveDesign('titleColor', e.target.value)}
+                            className={inp}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold mb-1">Subtitle / Description</label>
+                        <input
+                          type="text"
+                          value={activeDesign.subtitle || 'Explore our curated collections for every occasion.'}
+                          onChange={(e) => updateActiveDesign('subtitle', e.target.value)}
+                          className={inp}
+                          placeholder="Explore our curated collections for every occasion."
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Subtitle Color</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={activeDesign.subtitleColor || '#62564B'}
+                            onChange={(e) => updateActiveDesign('subtitleColor', e.target.value)}
+                            className="w-9 h-8 rounded border cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={activeDesign.subtitleColor || '#62564B'}
+                            onChange={(e) => updateActiveDesign('subtitleColor', e.target.value)}
+                            className={inp}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <div>
+                        <label className="block font-semibold mb-1">View All Button Label</label>
+                        <input
+                          type="text"
+                          value={activeDesign.viewAllText || 'View All Categories'}
+                          onChange={(e) => updateActiveDesign('viewAllText', e.target.value)}
+                          className={inp}
+                          placeholder="View All Categories"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">View All Link</label>
+                        <input
+                          type="text"
+                          value={activeDesign.viewAllLink || '/shop'}
+                          onChange={(e) => updateActiveDesign('viewAllLink', e.target.value)}
+                          className={inp}
+                          placeholder="/shop"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 0E. PROMOTIONAL BANNERS CONTENT */}
+            {selectedSection === 'promotional_banners' && (
+              <div className={cardStyle}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('content')}
+                  className="w-full flex items-center justify-between text-left font-bold text-sm text-slate-800 dark:text-white cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText size={16} className="text-[#956638]" />
+                    <span>Promotional Banners Content & Images (Left & Right Cards)</span>
+                  </div>
+                  {openAccordion.content ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+
+                {openAccordion.content && (
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-4 space-y-6 text-xs">
+                    {/* Banner 1 (Left - Curated Combos) */}
+                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 space-y-3">
+                      <div className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#956638]" />
+                        <span>Left Card: Curated Bundles / Combos</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-semibold mb-1">Eyebrow Tag</label>
+                          <input
+                            type="text"
+                            value={activeDesign.banner1Eyebrow || 'CURATED COMBOS'}
+                            onChange={(e) => updateActiveDesign('banner1Eyebrow', e.target.value)}
+                            className={inp}
+                            placeholder="CURATED COMBOS"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-semibold mb-1">Card Heading</label>
+                          <input
+                            type="text"
+                            value={activeDesign.banner1Title || "Crafted for Life's Special Moments"}
+                            onChange={(e) => updateActiveDesign('banner1Title', e.target.value)}
+                            className={inp}
+                            placeholder="Crafted for Life's Special Moments"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-semibold mb-1">Button Label</label>
+                          <input
+                            type="text"
+                            value={activeDesign.banner1BtnText || 'Explore Bundles'}
+                            onChange={(e) => updateActiveDesign('banner1BtnText', e.target.value)}
+                            className={inp}
+                            placeholder="Explore Bundles"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-semibold mb-1">Button Link</label>
+                          <input
+                            type="text"
+                            value={activeDesign.banner1BtnLink || '/shop?category=Bundles'}
+                            onChange={(e) => updateActiveDesign('banner1BtnLink', e.target.value)}
+                            className={inp}
+                            placeholder="/shop?category=Bundles"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Background Image URL</label>
+                        <input
+                          type="text"
+                          value={activeDesign.banner1Image || ''}
+                          onChange={(e) => updateActiveDesign('banner1Image', e.target.value)}
+                          className={inp}
+                          placeholder="https://images.unsplash.com/..."
+                        />
+                      </div>
+                    </div>
+
+                    {/* Banner 2 (Right - Gift Sets) */}
+                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 space-y-3">
+                      <div className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#956638]" />
+                        <span>Right Card: Gifts & Sets</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-semibold mb-1">Eyebrow Tag</label>
+                          <input
+                            type="text"
+                            value={activeDesign.banner2Eyebrow || 'GIFT SETS'}
+                            onChange={(e) => updateActiveDesign('banner2Eyebrow', e.target.value)}
+                            className={inp}
+                            placeholder="GIFT SETS"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-semibold mb-1">Card Heading</label>
+                          <input
+                            type="text"
+                            value={activeDesign.banner2Title || 'A Gift That Lasts Forever'}
+                            onChange={(e) => updateActiveDesign('banner2Title', e.target.value)}
+                            className={inp}
+                            placeholder="A Gift That Lasts Forever"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-semibold mb-1">Button Label</label>
+                          <input
+                            type="text"
+                            value={activeDesign.banner2BtnText || 'Shop Gifts'}
+                            onChange={(e) => updateActiveDesign('banner2BtnText', e.target.value)}
+                            className={inp}
+                            placeholder="Shop Gifts"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-semibold mb-1">Button Link</label>
+                          <input
+                            type="text"
+                            value={activeDesign.banner2BtnLink || '/shop?category=Jewellery+Boxes'}
+                            onChange={(e) => updateActiveDesign('banner2BtnLink', e.target.value)}
+                            className={inp}
+                            placeholder="/shop?category=Jewellery+Boxes"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Background Image URL</label>
+                        <input
+                          type="text"
+                          value={activeDesign.banner2Image || ''}
+                          onChange={(e) => updateActiveDesign('banner2Image', e.target.value)}
+                          className={inp}
+                          placeholder="https://images.unsplash.com/..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 0F. BRAND STORY CONTENT */}
+            {selectedSection === 'brand_story' && (
+              <div className={cardStyle}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('content')}
+                  className="w-full flex items-center justify-between text-left font-bold text-sm text-slate-800 dark:text-white cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText size={16} className="text-[#956638]" />
+                    <span>Brand Story Copy, Arch Photo & Vintage Badge</span>
+                  </div>
+                  {openAccordion.content ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+
+                {openAccordion.content && (
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-4 space-y-4 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold mb-1">Eyebrow Text</label>
+                        <input
+                          type="text"
+                          value={activeDesign.eyebrow || 'OUR STORY'}
+                          onChange={(e) => updateActiveDesign('eyebrow', e.target.value)}
+                          className={inp}
+                          placeholder="OUR STORY"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Eyebrow & Accent Color</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={activeDesign.accentColor || '#956638'}
+                            onChange={(e) => updateActiveDesign('accentColor', e.target.value)}
+                            className="w-9 h-8 rounded border cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={activeDesign.accentColor || '#956638'}
+                            onChange={(e) => updateActiveDesign('accentColor', e.target.value)}
+                            className={inp}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold mb-1">Heading (supports multi-line with Enter)</label>
+                      <textarea
+                        rows={2}
+                        value={activeDesign.title || 'A Legacy of Grace\nand Thoughtful Storage'}
+                        onChange={(e) => updateActiveDesign('title', e.target.value)}
+                        className={inp}
+                        placeholder="A Legacy of Grace&#10;and Thoughtful Storage"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold mb-1">Story Paragraph</label>
+                      <textarea
+                        rows={3}
+                        value={activeDesign.description || "At Zenzies, we believe jewellery is more than an accessory — it's a symbol of love, confidence, and life's most cherished memories. Every piece of jewellery and organizer box is thoughtfully designed to ensure your treasured treasures remain beautifully organized, tangle-free, and protected for years to come."}
+                        onChange={(e) => updateActiveDesign('description', e.target.value)}
+                        className={inp}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <div>
+                        <label className="block font-semibold mb-1">Button Label</label>
+                        <input
+                          type="text"
+                          value={activeDesign.btnText || 'Read Our Story'}
+                          onChange={(e) => updateActiveDesign('btnText', e.target.value)}
+                          className={inp}
+                          placeholder="Read Our Story"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Button Link</label>
+                        <input
+                          type="text"
+                          value={activeDesign.btnLink || '/about'}
+                          onChange={(e) => updateActiveDesign('btnLink', e.target.value)}
+                          className={inp}
+                          placeholder="/about"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                      <div className="font-bold text-slate-800 dark:text-white">Arched Photo & Decorative Overlays</div>
+                      <div>
+                        <label className="block font-semibold mb-1">Story Image URL</label>
+                        <input
+                          type="text"
+                          value={activeDesign.image || ''}
+                          onChange={(e) => updateActiveDesign('image', e.target.value)}
+                          className={inp}
+                          placeholder="https://images.unsplash.com/..."
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-semibold mb-1">Script Handwriting Line 1</label>
+                          <input
+                            type="text"
+                            value={activeDesign.scriptLine1 || 'Handcrafted'}
+                            onChange={(e) => updateActiveDesign('scriptLine1', e.target.value)}
+                            className={inp}
+                            placeholder="Handcrafted"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-semibold mb-1">Script Handwriting Line 2</label>
+                          <input
+                            type="text"
+                            value={activeDesign.scriptLine2 || 'With Love ♡'}
+                            onChange={(e) => updateActiveDesign('scriptLine2', e.target.value)}
+                            className={inp}
+                            placeholder="With Love ♡"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block font-semibold mb-1">Badge Brand Name</label>
+                          <input
+                            type="text"
+                            value={activeDesign.badgeTitle || 'ZENZIES'}
+                            onChange={(e) => updateActiveDesign('badgeTitle', e.target.value)}
+                            className={inp}
+                            placeholder="ZENZIES"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-semibold mb-1">Badge Year</label>
+                          <input
+                            type="text"
+                            value={activeDesign.badgeYear || 'EST. 2024'}
+                            onChange={(e) => updateActiveDesign('badgeYear', e.target.value)}
+                            className={inp}
+                            placeholder="EST. 2024"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-semibold mb-1">Badge Subtitle</label>
+                          <input
+                            type="text"
+                            value={activeDesign.badgeSubtitle || 'Authentic Care'}
+                            onChange={(e) => updateActiveDesign('badgeSubtitle', e.target.value)}
+                            className={inp}
+                            placeholder="Authentic Care"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 0G. TESTIMONIALS CONTENT */}
+            {selectedSection === 'testimonials' && (
+              <div className={cardStyle}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('content')}
+                  className="w-full flex items-center justify-between text-left font-bold text-sm text-slate-800 dark:text-white cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText size={16} className="text-[#956638]" />
+                    <span>Testimonials Header & Card Styling</span>
+                  </div>
+                  {openAccordion.content ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+
+                {openAccordion.content && (
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-4 space-y-4 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold mb-1">Eyebrow Text</label>
+                        <input
+                          type="text"
+                          value={activeDesign.eyebrow || 'WHAT OUR CUSTOMERS SAY'}
+                          onChange={(e) => updateActiveDesign('eyebrow', e.target.value)}
+                          className={inp}
+                          placeholder="WHAT OUR CUSTOMERS SAY"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Section Heading</label>
+                        <input
+                          type="text"
+                          value={activeDesign.title || 'Loved by Thousands'}
+                          onChange={(e) => updateActiveDesign('title', e.target.value)}
+                          className={inp}
+                          placeholder="Loved by Thousands"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold mb-1">Review Card Background Color</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={activeDesign.cardBackgroundColor || '#FFFFFF'}
+                            onChange={(e) => updateActiveDesign('cardBackgroundColor', e.target.value)}
+                            className="w-9 h-8 rounded border cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={activeDesign.cardBackgroundColor || '#FFFFFF'}
+                            onChange={(e) => updateActiveDesign('cardBackgroundColor', e.target.value)}
+                            className={inp}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Review Card Border Color</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={activeDesign.cardBorderColor || '#E8DDD2'}
+                            onChange={(e) => updateActiveDesign('cardBorderColor', e.target.value)}
+                            className="w-9 h-8 rounded border cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={activeDesign.cardBorderColor || '#E8DDD2'}
+                            onChange={(e) => updateActiveDesign('cardBorderColor', e.target.value)}
+                            className={inp}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 0H. SOCIAL GALLERY CONTENT */}
+            {selectedSection === 'social_gallery' && (
+              <div className={cardStyle}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('content')}
+                  className="w-full flex items-center justify-between text-left font-bold text-sm text-slate-800 dark:text-white cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText size={16} className="text-[#956638]" />
+                    <span>Instagram Community Gallery Headings & Profile Link</span>
+                  </div>
+                  {openAccordion.content ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+
+                {openAccordion.content && (
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-4 space-y-4 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold mb-1">Eyebrow Handle</label>
+                        <input
+                          type="text"
+                          value={activeDesign.eyebrow || 'FOLLOW @ZENZIES'}
+                          onChange={(e) => updateActiveDesign('eyebrow', e.target.value)}
+                          className={inp}
+                          placeholder="FOLLOW @ZENZIES"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Section Heading</label>
+                        <input
+                          type="text"
+                          value={activeDesign.title || 'Join Our Shining Community'}
+                          onChange={(e) => updateActiveDesign('title', e.target.value)}
+                          className={inp}
+                          placeholder="Join Our Shining Community"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block font-semibold mb-1">Instagram Profile URL</label>
+                      <input
+                        type="text"
+                        value={activeDesign.instagramUrl || 'https://www.instagram.com'}
+                        onChange={(e) => updateActiveDesign('instagramUrl', e.target.value)}
+                        className={inp}
+                        placeholder="https://www.instagram.com/zenzies"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 0I. NEWSLETTER CONTENT */}
+            {selectedSection === 'newsletter' && (
+              <div className={cardStyle}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('content')}
+                  className="w-full flex items-center justify-between text-left font-bold text-sm text-slate-800 dark:text-white cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText size={16} className="text-[#956638]" />
+                    <span>Newsletter Heading, Copy, Button & Gift Visual</span>
+                  </div>
+                  {openAccordion.content ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+
+                {openAccordion.content && (
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-4 space-y-4 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold mb-1">Newsletter Title</label>
+                        <input
+                          type="text"
+                          value={activeDesign.title || 'Get Exclusive Offers'}
+                          onChange={(e) => updateActiveDesign('title', e.target.value)}
+                          className={inp}
+                          placeholder="Get Exclusive Offers"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Title Color</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={activeDesign.titleColor || '#211A16'}
+                            onChange={(e) => updateActiveDesign('titleColor', e.target.value)}
+                            className="w-9 h-8 rounded border cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={activeDesign.titleColor || '#211A16'}
+                            onChange={(e) => updateActiveDesign('titleColor', e.target.value)}
+                            className={inp}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold mb-1">Subtitle / Incentives Copy</label>
+                      <textarea
+                        rows={2}
+                        value={activeDesign.subtitle || 'Subscribe and be the first to know about new collections, special offers and smart jewellery storage tips.'}
+                        onChange={(e) => updateActiveDesign('subtitle', e.target.value)}
+                        className={inp}
+                        placeholder="Subscribe and be the first to know..."
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold mb-1">Subscribe Button Text</label>
+                        <input
+                          type="text"
+                          value={activeDesign.btnText || 'Subscribe'}
+                          onChange={(e) => updateActiveDesign('btnText', e.target.value)}
+                          className={inp}
+                          placeholder="Subscribe"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-1">Button Color</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={activeDesign.btnBgColor || '#956638'}
+                            onChange={(e) => updateActiveDesign('btnBgColor', e.target.value)}
+                            className="w-9 h-8 rounded border cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={activeDesign.btnBgColor || '#956638'}
+                            onChange={(e) => updateActiveDesign('btnBgColor', e.target.value)}
+                            className={inp}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                      <div className="font-bold text-slate-800 dark:text-white">Gift Box Visual & Handwriting Overlay</div>
+                      <div>
+                        <label className="block font-semibold mb-1">Gift Photo URL</label>
+                        <input
+                          type="text"
+                          value={activeDesign.image || ''}
+                          onChange={(e) => updateActiveDesign('image', e.target.value)}
+                          className={inp}
+                          placeholder="https://images.unsplash.com/..."
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-semibold mb-1">Script Line 1</label>
+                          <input
+                            type="text"
+                            value={activeDesign.scriptLine1 || 'A Brighter Tomorrow'}
+                            onChange={(e) => updateActiveDesign('scriptLine1', e.target.value)}
+                            className={inp}
+                            placeholder="A Brighter Tomorrow"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-semibold mb-1">Script Line 2</label>
+                          <input
+                            type="text"
+                            value={activeDesign.scriptLine2 || 'Starts Here ♡'}
+                            onChange={(e) => updateActiveDesign('scriptLine2', e.target.value)}
+                            className={inp}
+                            placeholder="Starts Here ♡"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

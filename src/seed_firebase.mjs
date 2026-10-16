@@ -2,13 +2,13 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDKTCwXYM5BlOT8uhYvB5H3Bk4UiIX5aN4",
-  authDomain: "velouraz-e708a.firebaseapp.com",
-  projectId: "velouraz-e708a",
-  storageBucket: "velouraz-e708a.firebasestorage.app",
-  messagingSenderId: "427246020538",
-  appId: "1:427246020538:web:f709bc8574fbcfe6061f83",
-  measurementId: "G-6NH5MQ96B2"
+  apiKey: "AIzaSyAD-33D6F3pEm_73vQbqDtpwXmwWwJqobo",
+  authDomain: "zenzies-f3971.firebaseapp.com",
+  projectId: "zenzies-f3971",
+  storageBucket: "zenzies-f3971.firebasestorage.app",
+  messagingSenderId: "694511372753",
+  appId: "1:694511372753:web:f15ade02c0df7d0d7338f0",
+  measurementId: "G-6H882RJPSD"
 };
 
 const app = initializeApp(firebaseConfig);
