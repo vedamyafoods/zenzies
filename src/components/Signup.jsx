@@ -5,7 +5,7 @@ import { Mail, Lock, User, ArrowRight, ArrowLeft, Eye, EyeOff, AlertCircle, Shie
 import { motion } from "framer-motion";
 import OtpModal from "./OtpModal";
 
-const SERIF = "'Cormorant Garamond', Georgia, serif";
+const SERIF = "'Playfair Display', Georgia, serif";
 const GOLD = '#C8A97A';
 const CRIMSON = '#2e0e43';
 

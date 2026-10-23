@@ -4,72 +4,98 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import useSectionDesign from '../../hooks/useSectionDesign';
 
-const CRAFT_IMG = "https://images.unsplash.com/photo-1531995811006-35cb42e1a022?auto=format&fit=crop&q=80&w=900";
+const DEFAULT_STORY_IMG = "/img/zenzies/jeweler_craftsmanship.jpg";
 
 const BrandStory = () => {
   const { design, containerStyle, overlayStyle, isEnabled } = useSectionDesign('brand_story', {
-    backgroundColor: '#FFFFFF',
-    paddingTop: '48px',
-    paddingBottom: '80px',
+    backgroundColor: '#FAF7F2',
+    paddingTop: '10px',
+    paddingBottom: '10px',
   });
 
   if (!isEnabled) return null;
 
   const eyebrow = design.eyebrow || 'OUR STORY';
-  const title = design.title || 'A Legacy of Grace\nand Thoughtful Storage';
-  const description = design.description || design.subtitle || "At Zenzies, we believe jewellery is more than an accessory — it's a symbol of love, confidence, and life's most cherished memories. Every piece of jewellery and organizer box is thoughtfully designed to ensure your treasured treasures remain beautifully organized, tangle-free, and protected for years to come.";
-  const btnText = design.btnText || 'Read Our Story';
+  const title = design.title || 'A Legacy of Grace\nand Craftsmanship';
+  const description =
+    design.description ||
+    design.subtitle ||
+    "At Zenzies, we believe jewellery is more than an accessory — it's a symbol of love, confidence and life's most beautiful moments. Each piece is thoughtfully designed and ethically crafted to be cherished forever.";
+  const btnText = design.btnText || 'Our Story';
   const btnLink = design.btnLink || '/about';
-  const storyImage = design.image || CRAFT_IMG;
+  const storyImage = design.image || DEFAULT_STORY_IMG;
+
+  // Watermark Seal Tokens
+  const sealEnabled = design.sealEnabled !== false;
+  const sealTopText = design.sealTopText || 'FINE JEWELLERS';
+  const sealBrand = design.sealBrand || 'ZENZIES';
+  const sealYear = design.sealYear || 'EST. 2024';
+  const sealColor = design.sealColor || '#C5A880';
   const scriptLine1 = design.scriptLine1 || 'Handcrafted';
   const scriptLine2 = design.scriptLine2 || 'With Love ♡';
-  const badgeTitle = design.badgeTitle || 'ZENZIES';
-  const badgeYear = design.badgeYear || 'EST. 2024';
-  const badgeSubtitle = design.badgeSubtitle || 'Authentic Care';
+  const scriptColor = design.scriptColor || '#C5A880';
+
+  const accentColor = design.accentColor || '#8C6239';
+  const titleColor = design.titleColor || '#211A16';
+  const textColor = design.textColor || design.subtitleColor || '#5A5046';
+  const btnBgColor = design.btnBgColor || '#8C6239';
 
   return (
-    <section style={containerStyle} className="relative w-full border-b border-[#E8DDD2] overflow-hidden">
+    <section
+      style={{
+        ...containerStyle,
+        backgroundColor: design.backgroundColor || '#FAF7F2',
+        paddingTop: design.paddingTop || '56px',
+        paddingBottom: design.paddingBottom || '72px',
+      }}
+      className="relative w-full border-b border-[#E8DDD2]/60 overflow-hidden"
+    >
       {overlayStyle && (
         <div className="absolute inset-0 pointer-events-none z-0" style={overlayStyle} />
       )}
+
       <div className="max-w-[1320px] mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
 
-          {/* Left Column: Story Content */}
+          {/* ─── Left Column: Brand Story Content ─────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="lg:col-span-6 space-y-6 text-left"
+            className="lg:col-span-6 space-y-5 text-left"
           >
+            {/* Eyebrow */}
             <span
               className="text-[11px] font-sans font-semibold tracking-[0.22em] uppercase block"
-              style={{ color: design.accentColor || '#956638' }}
+              style={{ color: accentColor }}
             >
               {eyebrow}
             </span>
 
+            {/* Main Headline */}
             <h2
-              className="font-serif text-3xl sm:text-4xl lg:text-[44px] font-normal leading-[1.14] tracking-tight whitespace-pre-line"
-              style={{ color: design.titleColor || '#211A16' }}
+              className="font-serif text-3xl sm:text-4xl lg:text-[42px] xl:text-[44px] font-normal leading-[1.15] tracking-tight whitespace-pre-line"
+              style={{ color: titleColor }}
             >
               {title}
             </h2>
 
+            {/* Description Body */}
             <p
-              className="text-xs sm:text-sm font-sans leading-[1.75] max-w-lg"
-              style={{ color: design.textColor || design.subtitleColor || '#6B5E52' }}
+              className="text-xs sm:text-[13.5px] font-sans leading-[1.75] max-w-lg"
+              style={{ color: textColor }}
             >
               {description}
             </p>
 
+            {/* CTA Button */}
             {design.btnEnabled !== false && (
-              <div>
+              <div className="pt-2">
                 <Link
                   to={btnLink}
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-[6px] text-white text-xs sm:text-sm font-sans font-semibold tracking-wide transition-all shadow-sm"
-                  style={{ backgroundColor: design.btnBgColor || '#956638' }}
+                  style={{ backgroundColor: btnBgColor }}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-[4px] text-white text-xs sm:text-sm font-sans font-semibold tracking-wide hover:brightness-105 hover:shadow-md transition-all shadow-xs"
                 >
                   <span>{btnText}</span>
                   <ArrowRight size={14} />
@@ -78,16 +104,16 @@ const BrandStory = () => {
             )}
           </motion.div>
 
-          {/* Right Column: Arched Image with Round Stamp & Script Overlay */}
+          {/* ─── Right Column: Arched Craft Image + Zenzies Watermark Seal ─── */}
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="lg:col-span-6 relative flex items-center justify-center pt-6 lg:pt-0"
+            className="lg:col-span-6 relative flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-6 sm:gap-8 lg:gap-9 pt-4 lg:pt-0"
           >
-            {/* Arched Photo Frame */}
-            <div className="relative w-full max-w-md aspect-[4/4.2] rounded-t-[140px] rounded-b-2xl overflow-hidden border border-[#E8DDD2] shadow-md bg-[#FAF6F0]">
+            {/* Arched Photo Frame (Exact matching arch curve) */}
+            <div className="relative w-[260px] sm:w-[290px] md:w-[450px] aspect-[4/3.8] rounded-t-full rounded-b-none overflow-hidden border border-[#E8DDD2]/80 shadow-xs bg-[#FAF6F0] shrink-0">
               <img
                 src={storyImage}
                 alt="Zenzies Jewellery Craftsmanship"
@@ -95,31 +121,135 @@ const BrandStory = () => {
                 decoding="async"
                 className="w-full h-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#211A16]/30 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent pointer-events-none" />
+            </div>
 
-              {/* Delicate Script Accent safely nested inside image at bottom right */}
-              <div className="absolute bottom-5 right-5 pointer-events-none drop-shadow-md text-right z-10">
-                <p className="text-2xl sm:text-3xl text-white font-script leading-tight" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.7)' }}>
-                  {scriptLine1}
-                </p>
-                <p className="text-xl sm:text-2xl text-white/95 font-script -mt-1" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.7)' }}>
-                  {scriptLine2}
-                </p>
+            {/* Watermark Seal Stamp & Script Accent (Sitting to the right of image) */}
+            {sealEnabled && (
+              <div className="flex flex-col items-center justify-center gap-3 shrink-0 select-none">
+                {/* Circular Fine Jewellers Stamp */}
+                <div className="relative w-32 h-32 sm:w-36 sm:h-36 flex items-center justify-center">
+                  <svg
+                    viewBox="0 0 160 160"
+                    className="w-full h-full"
+                    style={{ color: sealColor }}
+                  >
+                    {/* Outer Ring */}
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="76"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                      opacity="0.85"
+                    />
+
+                    {/* Inner Dotted Ring */}
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="70"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="0.8"
+                      strokeDasharray="2 3"
+                      opacity="0.6"
+                    />
+
+                    {/* Innermost Core Ring */}
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="50"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="0.8"
+                      opacity="0.45"
+                    />
+
+                    {/* Top Curved Path for Seal Top Text */}
+                    <path
+                      id="seal-curve-top"
+                      d="M 24 80 A 56 56 0 0 1 136 80"
+                      fill="none"
+                    />
+                    <text
+                      className="text-[9px] uppercase tracking-[0.28em] font-sans font-medium"
+                      fill="currentColor"
+                      textAnchor="middle"
+                    >
+                      <textPath href="#seal-curve-top" startOffset="50%">
+                        {sealTopText}
+                      </textPath>
+                    </text>
+
+                    {/* Middle Brand Name */}
+                    <text
+                      x="80"
+                      y="85"
+                      textAnchor="middle"
+                      className="text-[13px] font-sans font-semibold tracking-[0.32em] uppercase"
+                      fill="currentColor"
+                    >
+                      {sealBrand}
+                    </text>
+
+                    {/* Decorative Star Dots */}
+                    <text
+                      x="46"
+                      y="84"
+                      textAnchor="middle"
+                      className="text-[8px]"
+                      fill="currentColor"
+                      opacity="0.7"
+                    >
+                      ✦
+                    </text>
+                    <text
+                      x="114"
+                      y="84"
+                      textAnchor="middle"
+                      className="text-[8px]"
+                      fill="currentColor"
+                      opacity="0.7"
+                    >
+                      ✦
+                    </text>
+
+                    {/* Bottom Curved Path for Seal Year / Text */}
+                    <path
+                      id="seal-curve-bottom"
+                      d="M 26 80 A 54 54 0 0 0 134 80"
+                      fill="none"
+                    />
+                    <text
+                      className="text-[8.5px] uppercase tracking-[0.28em] font-sans font-normal"
+                      fill="currentColor"
+                      textAnchor="middle"
+                    >
+                      <textPath href="#seal-curve-bottom" startOffset="50%">
+                        • {sealYear} •
+                      </textPath>
+                    </text>
+                  </svg>
+                </div>
+
+                {/* Handwritten Script Beneath Seal */}
+                <div
+                  className="text-center font-script leading-tight"
+                  style={{ color: scriptColor }}
+                >
+                  <p className="text-2xl sm:text-[28px] tracking-wide">
+                    {scriptLine1}
+                  </p>
+                  <p className="text-xl sm:text-[24px] -mt-1 tracking-wide">
+                    {scriptLine2}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Circular Stamp Badge */}
-            <div className="absolute -top-3 right-4 sm:right-8 w-22 h-22 sm:w-26 sm:h-26 rounded-full border border-[#956638]/40 bg-white/95 backdrop-blur-xs shadow-md p-2 flex flex-col items-center justify-center text-center z-20">
-              <span className="text-[9px] font-sans font-bold tracking-[0.2em] text-[#956638] uppercase">
-                {badgeTitle}
-              </span>
-              <span className="text-[8px] font-mono text-[#6B5E52] my-0.5">
-                {badgeYear}
-              </span>
-              <span className="text-[8px] font-serif italic text-[#956638]">
-                {badgeSubtitle}
-              </span>
-            </div>
           </motion.div>
 
         </div>

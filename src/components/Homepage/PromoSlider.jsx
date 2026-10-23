@@ -74,7 +74,7 @@ const staticCollections = DEFAULT_HOMEPAGE_WORLD_EDIT_VIDEOS;
 
 const CRIMSON = '#2e0e43';
 const LIGHT_BG = '#FFFFFF';
-const SERIF = "'Cormorant Garamond', Georgia, serif";
+const SERIF = "'Playfair Display', Georgia, serif";
 
 const CardItem = ({ item }) => {
   const [isHovered, setIsHovered] = useState(false);

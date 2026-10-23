@@ -8,7 +8,7 @@ import Breadcrumb from '../components/Breadcrumb';
 import useSEO from '../hooks/useSEO';
 
 const GOLD = '#C8A97A';
-const SERIF = "'Cormorant Garamond', Georgia, serif";
+const SERIF = "'Playfair Display', Georgia, serif";
 
 const defaultBlogs = [
   {

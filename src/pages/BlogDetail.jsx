@@ -6,7 +6,7 @@ import { Calendar, User, Clock, ArrowLeft, Share2, MessageCircle, Loader2, Spark
 import { motion } from 'framer-motion';
 
 const GOLD = '#C8A97A';
-const SERIF = "'Cormorant Garamond', Georgia, serif";
+const SERIF = "'Playfair Display', Georgia, serif";
 
 const defaultBlogs = [
   {

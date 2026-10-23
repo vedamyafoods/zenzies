@@ -14,7 +14,7 @@ export const DEFAULT_MARQUEE_ITEMS = [
   '✦ 4–5 Days Express Delivery',
 ];
 
-const SERIF = "'Cormorant Garamond', Georgia, serif";
+const SERIF = "'Playfair Display', Georgia, serif";
 
 /**
  * High-visibility luxury brand marquee ticker (Bottom Hero Section Scroll Texts)
