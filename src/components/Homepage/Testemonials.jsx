@@ -124,20 +124,20 @@ const TestimonialSection = () => {
         <div className="absolute inset-0 pointer-events-none z-0" style={overlayStyle} />
       )}
 
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
+      <div className="w-full max-w-[1640px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 relative z-10">
 
         {/* Section Header with Left Title and Right Navigation Arrows */}
         <div className="flex items-end justify-between mb-8 sm:mb-10">
           <div className="space-y-1 text-left">
             <span
               className="text-[11px] font-sans font-semibold tracking-[0.22em] uppercase block"
-              style={{ color: accentColor }}
+              style={{ color: accentColor, fontSize: design.eyebrowFontSize || undefined }}
             >
               {eyebrow}
             </span>
             <h2
               className="font-serif text-3xl sm:text-4xl lg:text-[40px] font-normal leading-tight tracking-tight"
-              style={{ color: titleColor }}
+              style={{ color: titleColor, fontSize: design.titleFontSize || undefined }}
             >
               {title}
             </h2>
@@ -201,7 +201,10 @@ const TestimonialSection = () => {
                   {/* Right Column: Quote, Stars & Customer Details */}
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     {/* Review Quote in Quotes */}
-                    <p className="text-xs sm:text-[13px] font-sans text-[#211A16] leading-relaxed font-normal">
+                    <p
+                      className="text-xs sm:text-[13px] font-sans text-[#211A16] leading-relaxed font-normal"
+                      style={{ fontSize: design.quoteFontSize || undefined }}
+                    >
                       "{review.quote}"
                     </p>
 

@@ -112,8 +112,31 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [iconPickerTarget, setIconPickerTarget] = useState(null); // { type: 'hero_benefit'|'trust_benefit', index: number }
 
+  // ─── Homepage Sections Layout State ─────────────────────────────────────────
+  const [homepageSections, setHomepageSections] = useState([
+    { id: "hero", label: "Hero Video & Banner", enabled: true, order: 1 },
+    { id: "category_grid", label: "Shop by Category", enabled: true, order: 2 },
+    { id: "jewellery_box_banner", label: "Premium Jewelry Boxes Banner", enabled: true, order: 3 },
+    { id: "bestsellers", label: "Our Most Loved Pieces (Bestsellers)", enabled: true, order: 4 },
+    { id: "trust_benefits", label: "Trust Badges Strip", enabled: true, order: 5 },
+    { id: "promotional_banners", label: "Promotional Banners (50/50 Split)", enabled: true, order: 6 },
+    { id: "brand_story", label: "Our Story", enabled: true, order: 7 },
+    { id: "testimonials", label: "What Our Customers Say", enabled: true, order: 8 },
+    { id: "social_gallery", label: "Join Our Shining Community", enabled: true, order: 9 },
+    { id: "newsletter", label: "Get Exclusive Offers", enabled: true, order: 10 },
+  ]);
+  const [savingSectionsLayout, setSavingSectionsLayout] = useState(false);
+  const [savedSectionsLayout, setSavedSectionsLayout] = useState(false);
+
   // ─── Initial Load from Firebase ────────────────────────────────────────────
   useEffect(() => {
+    // Read Homepage Sections Layout & Ordering
+    getDoc(doc(db, "site_settings", "homepage_sections")).then((snap) => {
+      if (snap.exists() && Array.isArray(snap.data().sections) && snap.data().sections.length > 0) {
+        setHomepageSections(snap.data().sections);
+      }
+    });
+
     // Read Hero banner config
     const heroRef = doc(db, "site_settings", "hero");
     getDoc(heroRef).then((snap) => {
@@ -254,6 +277,10 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
           btn1Link: heroData.btn1Link,
           btn2Text: heroData.btn2Text,
           btn2Link: heroData.btn2Link,
+          eyebrowFontSize: heroData.eyebrowFontSize || "",
+          titleFontSize: heroData.titleFontSize || "",
+          subtitleFontSize: heroData.subtitleFontSize || "",
+          badgeFontSize: heroData.badgeFontSize || "",
         }
       }, { merge: true });
 
@@ -441,8 +468,49 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
     setIconPickerTarget(null);
   };
 
+  // ─── Homepage Sections Layout Handlers ─────────────────────────────────────
+  const handleSaveSectionsLayout = async () => {
+    setSavingSectionsLayout(true);
+    setSavedSectionsLayout(false);
+    try {
+      await setDoc(doc(db, "site_settings", "homepage_sections"), {
+        sections: homepageSections,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      setSavedSectionsLayout(true);
+      setTimeout(() => setSavedSectionsLayout(false), 3000);
+    } catch (err) {
+      console.error("Save layout failed:", err);
+      alert("Failed to save sections layout.");
+    } finally {
+      setSavingSectionsLayout(false);
+    }
+  };
+
+  const handleMoveSectionLayout = (idx, dir) => {
+    setHomepageSections((prev) => {
+      const next = [...prev];
+      const target = idx + dir;
+      if (target < 0 || target >= next.length) return prev;
+      const temp = next[idx];
+      next[idx] = next[target];
+      next[target] = temp;
+      return next.map((item, index) => ({ ...item, order: index + 1 }));
+    });
+  };
+
+  const handleToggleSectionLayout = (idx, checked) => {
+    setHomepageSections((prev) => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], enabled: checked };
+      return next;
+    });
+  };
+
   // ─── Sub-tabs definitions ──────────────────────────────────────────────────
   const SUB_TABS = [
+    { id: "sections_layout", label: "00. Layout & Section Order" },
+    { id: "global_buttons", label: "✦ Button Gradients & Styling" },
     { id: "hero", label: "01. Hero Video & Banner" },
     { id: "announcements", label: "02. Top Header Texts" },
     { id: "hero_marquee", label: "03. Bottom Hero Scroll Texts" },
@@ -477,6 +545,303 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
           </button>
         ))}
       </div>
+
+      {/* ────────────────────────────────────────────────────────────────────────
+          TAB 00: HOMEPAGE SECTIONS LAYOUT & ORDER BUILDER
+      ──────────────────────────────────────────────────────────────────────── */}
+      {activeSubTab === "sections_layout" && (
+        <div className={cardStyle}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <h3 className={`text-base font-bold ${isDarkMode ? "text-white" : "text-slate-800"}`}>Homepage Sections Layout & Order</h3>
+              <p className="text-xs text-slate-400">Reorder sections or toggle visibility on the live storefront in real time</p>
+            </div>
+            <button
+              onClick={handleSaveSectionsLayout}
+              disabled={savingSectionsLayout}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#941232] hover:bg-[#b01540] text-white text-xs sm:text-sm font-bold transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+            >
+              {savingSectionsLayout ? <Loader2 size={14} className="animate-spin" /> : savedSectionsLayout ? <Check size={14} /> : <Save size={14} />}
+              {savingSectionsLayout ? "Saving..." : savedSectionsLayout ? "Saved!" : "Save Section Order"}
+            </button>
+          </div>
+
+          <div className="space-y-3 max-w-3xl">
+            {homepageSections.map((sec, idx) => (
+              <div
+                key={sec.id || idx}
+                className={`flex items-center justify-between p-3.5 rounded-xl border transition-all ${
+                  sec.enabled !== false
+                    ? isDarkMode ? "bg-slate-950 border-slate-800" : "bg-slate-50 border-slate-200"
+                    : isDarkMode ? "bg-slate-950/40 border-slate-800/40 opacity-60" : "bg-slate-100/60 border-slate-200/60 opacity-60"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="w-7 h-7 rounded-lg bg-[#941232]/10 text-[#941232] flex items-center justify-center font-mono font-bold text-xs shrink-0">
+                    {idx + 1}
+                  </span>
+                  <div>
+                    <h4 className="text-sm font-semibold">{sec.label}</h4>
+                    <span className="text-[11px] font-mono text-slate-400">ID: {sec.id}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer mr-2">
+                    <input
+                      type="checkbox"
+                      checked={sec.enabled !== false}
+                      onChange={(e) => handleToggleSectionLayout(idx, e.target.checked)}
+                      className="cursor-pointer"
+                    />
+                    <span>{sec.enabled !== false ? "Visible" : "Hidden"}</span>
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => handleMoveSectionLayout(idx, -1)}
+                    disabled={idx === 0}
+                    className="p-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white disabled:opacity-30 cursor-pointer"
+                    title="Move up"
+                  >
+                    <ChevronUp size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleMoveSectionLayout(idx, 1)}
+                    disabled={idx === homepageSections.length - 1}
+                    className="p-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white disabled:opacity-30 cursor-pointer"
+                    title="Move down"
+                  >
+                    <ChevronDown size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ────────────────────────────────────────────────────────────────────────
+          TAB: GLOBAL BUTTON GRADIENTS & STYLING
+      ──────────────────────────────────────────────────────────────────────── */}
+      {activeSubTab === "global_buttons" && (
+        <div className={cardStyle}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <div className="flex items-center gap-2">
+                <Sparkles size={18} className="text-amber-500" />
+                <h3 className={`text-base font-bold ${isDarkMode ? "text-white" : "text-slate-800"}`}>
+                  Global Button Gradients & Styling
+                </h3>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Configure luxury gradient colors applied across all primary CTA buttons on the live storefront
+              </p>
+            </div>
+            <button
+              onClick={() => handleSaveSection('global_buttons')}
+              disabled={savingSection === 'global_buttons'}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#941232] hover:bg-[#b01540] text-white text-xs sm:text-sm font-bold transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+            >
+              {savingSection === 'global_buttons' ? <Loader2 size={14} className="animate-spin" /> : savedSection === 'global_buttons' ? <Check size={14} /> : <Save size={14} />}
+              {savingSection === 'global_buttons' ? "Saving..." : savedSection === 'global_buttons' ? "Saved!" : "Save Button Styling"}
+            </button>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-12 max-w-5xl">
+            {/* Left Column: Color Controls & Quick Presets */}
+            <div className="space-y-5 lg:col-span-7">
+              {/* Presets */}
+              <div>
+                <label className={labelStyle}>Curated Luxury Gradient Presets</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {[
+                    { name: "Royal Bronze", from: "#A26B38", to: "#7B4F26", angle: "135deg" },
+                    { name: "Imperial Crimson", from: "#941232", to: "#680A20", angle: "135deg" },
+                    { name: "Caramel Gold", from: "#B37D42", to: "#875323", angle: "135deg" },
+                    { name: "Champagne Sunset", from: "#C89B58", to: "#9C682A", angle: "135deg" },
+                    { name: "Rose Gold Luxury", from: "#B76E79", to: "#88424D", angle: "135deg" },
+                    { name: "Deep Espresso", from: "#3E2719", to: "#1E120A", angle: "135deg" },
+                  ].map((preset) => (
+                    <button
+                      key={preset.name}
+                      type="button"
+                      onClick={() => {
+                        updateSectionToken('global_buttons', 'btnGradientFrom', preset.from);
+                        updateSectionToken('global_buttons', 'btnGradientTo', preset.to);
+                        updateSectionToken('global_buttons', 'btnGradientAngle', preset.angle);
+                        updateSectionToken('global_buttons', 'btnGradient', `linear-gradient(${preset.angle}, ${preset.from} 0%, ${preset.to} 100%)`);
+                      }}
+                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1.5 hover:scale-[1.02] ${
+                        (sectionDesigns.global_buttons?.btnGradientFrom === preset.from)
+                          ? "border-[#941232] ring-2 ring-[#941232]/20"
+                          : isDarkMode ? "border-slate-800 bg-slate-950" : "border-slate-200 bg-slate-50"
+                      }`}
+                    >
+                      <div
+                        className="w-full h-5 rounded-lg shadow-xs"
+                        style={{ background: `linear-gradient(${preset.angle}, ${preset.from} 0%, ${preset.to} 100%)` }}
+                      />
+                      <span className="text-[11px] font-bold truncate">{preset.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Gradient Inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Gradient Start Color</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={sectionDesigns.global_buttons?.btnGradientFrom || "#A26B38"}
+                      onChange={(e) => {
+                        const from = e.target.value;
+                        const to = sectionDesigns.global_buttons?.btnGradientTo || "#7B4F26";
+                        const angle = sectionDesigns.global_buttons?.btnGradientAngle || "135deg";
+                        updateSectionToken('global_buttons', 'btnGradientFrom', from);
+                        updateSectionToken('global_buttons', 'btnGradient', `linear-gradient(${angle}, ${from} 0%, ${to} 100%)`);
+                      }}
+                      className="w-9 h-9 rounded-lg border border-slate-300 dark:border-slate-700 cursor-pointer p-0.5 bg-transparent shrink-0"
+                    />
+                    <input
+                      type="text"
+                      value={sectionDesigns.global_buttons?.btnGradientFrom || "#A26B38"}
+                      onChange={(e) => {
+                        const from = e.target.value;
+                        const to = sectionDesigns.global_buttons?.btnGradientTo || "#7B4F26";
+                        const angle = sectionDesigns.global_buttons?.btnGradientAngle || "135deg";
+                        updateSectionToken('global_buttons', 'btnGradientFrom', from);
+                        updateSectionToken('global_buttons', 'btnGradient', `linear-gradient(${angle}, ${from} 0%, ${to} 100%)`);
+                      }}
+                      className={`${inp} py-1.5 text-xs font-mono`}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Gradient End Color</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={sectionDesigns.global_buttons?.btnGradientTo || "#7B4F26"}
+                      onChange={(e) => {
+                        const from = sectionDesigns.global_buttons?.btnGradientFrom || "#A26B38";
+                        const to = e.target.value;
+                        const angle = sectionDesigns.global_buttons?.btnGradientAngle || "135deg";
+                        updateSectionToken('global_buttons', 'btnGradientTo', to);
+                        updateSectionToken('global_buttons', 'btnGradient', `linear-gradient(${angle}, ${from} 0%, ${to} 100%)`);
+                      }}
+                      className="w-9 h-9 rounded-lg border border-slate-300 dark:border-slate-700 cursor-pointer p-0.5 bg-transparent shrink-0"
+                    />
+                    <input
+                      type="text"
+                      value={sectionDesigns.global_buttons?.btnGradientTo || "#7B4F26"}
+                      onChange={(e) => {
+                        const from = sectionDesigns.global_buttons?.btnGradientFrom || "#A26B38";
+                        const to = e.target.value;
+                        const angle = sectionDesigns.global_buttons?.btnGradientAngle || "135deg";
+                        updateSectionToken('global_buttons', 'btnGradientTo', to);
+                        updateSectionToken('global_buttons', 'btnGradient', `linear-gradient(${angle}, ${from} 0%, ${to} 100%)`);
+                      }}
+                      className={`${inp} py-1.5 text-xs font-mono`}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Gradient Angle</label>
+                  <select
+                    value={sectionDesigns.global_buttons?.btnGradientAngle || "135deg"}
+                    onChange={(e) => {
+                      const from = sectionDesigns.global_buttons?.btnGradientFrom || "#A26B38";
+                      const to = sectionDesigns.global_buttons?.btnGradientTo || "#7B4F26";
+                      const angle = e.target.value;
+                      updateSectionToken('global_buttons', 'btnGradientAngle', angle);
+                      updateSectionToken('global_buttons', 'btnGradient', `linear-gradient(${angle}, ${from} 0%, ${to} 100%)`);
+                    }}
+                    className={`${inp} py-1.5 text-xs font-mono`}
+                  >
+                    <option value="90deg">90° (Left to Right)</option>
+                    <option value="135deg">135° (Diagonal Luxury)</option>
+                    <option value="180deg">180° (Top to Bottom)</option>
+                    <option value="45deg">45° (Upward Diagonal)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Text Color & Radius */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Button Text Color</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.global_buttons?.btnTextColor || "#FFFFFF"}
+                    onChange={(e) => updateSectionToken('global_buttons', 'btnTextColor', e.target.value)}
+                    className={`${inp} py-1.5 text-xs font-mono`}
+                    placeholder="#FFFFFF"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Button Corner Radius</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.global_buttons?.btnBorderRadius || "6px"}
+                    onChange={(e) => updateSectionToken('global_buttons', 'btnBorderRadius', e.target.value)}
+                    className={`${inp} py-1.5 text-xs font-mono`}
+                    placeholder="e.g. 6px, 8px, 9999px"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Live Interactive Preview */}
+            <div className="lg:col-span-5 flex flex-col justify-between p-5 rounded-2xl border bg-[#FAF7F2] dark:bg-slate-950 border-[#E8DDD2] dark:border-slate-800 text-slate-800 dark:text-white space-y-4">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#956638] dark:text-amber-400 block mb-1">
+                  Live Storefront Preview
+                </span>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Real-time interactive simulation of buttons with current gradient & shadow
+                </p>
+              </div>
+
+              <div className="space-y-4 py-4 flex flex-col items-center">
+                {/* Simulated Hero Button */}
+                <div
+                  className="inline-flex items-center justify-center gap-3 px-7 py-3.5 text-sm font-semibold tracking-wide shadow-md transition-all cursor-pointer hover:brightness-105 hover:scale-[1.02]"
+                  style={{
+                    background: sectionDesigns.global_buttons?.btnGradient || `linear-gradient(${sectionDesigns.global_buttons?.btnGradientAngle || '135deg'}, ${sectionDesigns.global_buttons?.btnGradientFrom || '#A26B38'} 0%, ${sectionDesigns.global_buttons?.btnGradientTo || '#7B4F26'} 100%)`,
+                    color: sectionDesigns.global_buttons?.btnTextColor || '#FFFFFF',
+                    borderRadius: sectionDesigns.global_buttons?.btnBorderRadius || '6px',
+                  }}
+                >
+                  <span>Shop Jewellery</span>
+                  <ArrowRight size={16} />
+                </div>
+
+                {/* Simulated Add to Cart Button */}
+                <div
+                  className="w-full max-w-[200px] py-2.5 px-4 text-xs font-semibold tracking-wider uppercase text-center shadow-md transition-all cursor-pointer hover:brightness-105"
+                  style={{
+                    background: sectionDesigns.global_buttons?.btnGradient || `linear-gradient(${sectionDesigns.global_buttons?.btnGradientAngle || '135deg'}, ${sectionDesigns.global_buttons?.btnGradientFrom || '#A26B38'} 0%, ${sectionDesigns.global_buttons?.btnGradientTo || '#7B4F26'} 100%)`,
+                    color: sectionDesigns.global_buttons?.btnTextColor || '#FFFFFF',
+                    borderRadius: sectionDesigns.global_buttons?.btnBorderRadius || '6px',
+                  }}
+                >
+                  Add to Cart
+                </div>
+              </div>
+
+              <div className="text-[11px] text-slate-400 font-mono text-center border-t border-slate-200 dark:border-slate-800 pt-3">
+                CSS: {sectionDesigns.global_buttons?.btnGradient || `linear-gradient(135deg, #A26B38 0%, #7B4F26 100%)`}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ────────────────────────────────────────────────────────────────────────
           TAB 1: HERO VIDEO & BANNER
@@ -664,6 +1029,56 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                     onChange={(e) => setHeroData({ ...heroData, btn2Link: e.target.value })}
                     className={inp}
                   />
+                </div>
+              </div>
+
+              {/* Dynamic Typography & Font Sizes */}
+              <div className={`p-4 rounded-xl border space-y-3 ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Typography Font Sizes (Customizable)</h4>
+                  <span className="text-[11px] text-slate-400 font-mono">Headings: Cormorant Garamond · Body: Montserrat</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-500 block mb-1">Eyebrow Size</label>
+                    <input
+                      type="text"
+                      value={heroData.eyebrowFontSize || ""}
+                      onChange={(e) => setHeroData({ ...heroData, eyebrowFontSize: e.target.value })}
+                      className={`${inp} py-1.5 text-xs`}
+                      placeholder="e.g. 13px"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-500 block mb-1">Title Size</label>
+                    <input
+                      type="text"
+                      value={heroData.titleFontSize || ""}
+                      onChange={(e) => setHeroData({ ...heroData, titleFontSize: e.target.value })}
+                      className={`${inp} py-1.5 text-xs`}
+                      placeholder="e.g. 56px"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-500 block mb-1">Subtitle Size</label>
+                    <input
+                      type="text"
+                      value={heroData.subtitleFontSize || ""}
+                      onChange={(e) => setHeroData({ ...heroData, subtitleFontSize: e.target.value })}
+                      className={`${inp} py-1.5 text-xs`}
+                      placeholder="e.g. 16px"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-500 block mb-1">Badges Size</label>
+                    <input
+                      type="text"
+                      value={heroData.badgeFontSize || ""}
+                      onChange={(e) => setHeroData({ ...heroData, badgeFontSize: e.target.value })}
+                      className={`${inp} py-1.5 text-xs`}
+                      placeholder="e.g. 13px"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1019,6 +1434,56 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                 />
               </div>
             </div>
+
+            {/* Dynamic Typography & Font Sizes */}
+            <div className={`p-4 rounded-xl border space-y-3 ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Typography Font Sizes (Customizable)</h4>
+                <span className="text-[11px] text-slate-400 font-mono">Headings: Cormorant Garamond · Body: Montserrat</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Eyebrow Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.category_grid?.eyebrowFontSize || ""}
+                    onChange={(e) => updateSectionToken('category_grid', 'eyebrowFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 11px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Title Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.category_grid?.titleFontSize || ""}
+                    onChange={(e) => updateSectionToken('category_grid', 'titleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 38px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Subtitle Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.category_grid?.subtitleFontSize || ""}
+                    onChange={(e) => updateSectionToken('category_grid', 'subtitleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 14px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Card Label Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.category_grid?.cardLabelFontSize || ""}
+                    onChange={(e) => updateSectionToken('category_grid', 'cardLabelFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 13px"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1125,6 +1590,56 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                     onChange={(e) => handleGenericImageUpload('jewellery_box_banner', 'backgroundImage', e.target.files?.[0])}
                   />
                 </label>
+              </div>
+            </div>
+
+            {/* Dynamic Typography & Font Sizes */}
+            <div className={`p-4 rounded-xl border space-y-3 ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Typography Font Sizes (Customizable)</h4>
+                <span className="text-[11px] text-slate-400 font-mono">Headings: Cormorant Garamond · Body: Montserrat</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Eyebrow Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.jewellery_box_banner?.eyebrowFontSize || ""}
+                    onChange={(e) => updateSectionToken('jewellery_box_banner', 'eyebrowFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 11px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Heading Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.jewellery_box_banner?.titleFontSize || ""}
+                    onChange={(e) => updateSectionToken('jewellery_box_banner', 'titleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 48px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Subtitle Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.jewellery_box_banner?.subtitleFontSize || ""}
+                    onChange={(e) => updateSectionToken('jewellery_box_banner', 'subtitleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 14px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Features Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.jewellery_box_banner?.featuresFontSize || ""}
+                    onChange={(e) => updateSectionToken('jewellery_box_banner', 'featuresFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 13px"
+                  />
+                </div>
               </div>
             </div>
 
@@ -1258,6 +1773,46 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                 />
               </div>
             </div>
+
+            {/* Dynamic Typography & Font Sizes */}
+            <div className={`p-4 rounded-xl border space-y-3 ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Typography Font Sizes (Customizable)</h4>
+                <span className="text-[11px] text-slate-400 font-mono">Headings: Cormorant Garamond · Body: Montserrat</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Eyebrow Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.bestsellers?.eyebrowFontSize || ""}
+                    onChange={(e) => updateSectionToken('bestsellers', 'eyebrowFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 11px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Title Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.bestsellers?.titleFontSize || ""}
+                    onChange={(e) => updateSectionToken('bestsellers', 'titleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 40px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Subtitle Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.bestsellers?.subtitleFontSize || ""}
+                    onChange={(e) => updateSectionToken('bestsellers', 'subtitleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 14px"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1376,6 +1931,36 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                 );
               })}
             </div>
+
+            {/* Dynamic Typography & Font Sizes */}
+            <div className={`p-4 rounded-xl border space-y-3 ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Typography Font Sizes (Customizable)</h4>
+                <span className="text-[11px] text-slate-400 font-mono">Headings: Cormorant Garamond · Body: Montserrat</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Badge Title Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.trust_benefits?.titleFontSize || ""}
+                    onChange={(e) => updateSectionToken('trust_benefits', 'titleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 13px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Badge Description Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.trust_benefits?.descFontSize || ""}
+                    onChange={(e) => updateSectionToken('trust_benefits', 'descFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 12px"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1411,6 +1996,16 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                   value={sectionDesigns.promotional_banners?.banner1Title || "Crafted for Life's Special Moments"}
                   onChange={(e) => updateSectionToken('promotional_banners', 'banner1Title', e.target.value)}
                   className={inp}
+                />
+              </div>
+              <div>
+                <label className={labelStyle}>Headline Font Size</label>
+                <input
+                  type="text"
+                  value={sectionDesigns.promotional_banners?.banner1TitleFontSize || ""}
+                  onChange={(e) => updateSectionToken('promotional_banners', 'banner1TitleFontSize', e.target.value)}
+                  className={`${inp} py-1.5 text-xs`}
+                  placeholder="e.g. 36px or clamp(24px, 2.8vw, 36px)"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -1465,6 +2060,16 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                   value={sectionDesigns.promotional_banners?.banner2Title || "A Gift That Lasts Forever"}
                   onChange={(e) => updateSectionToken('promotional_banners', 'banner2Title', e.target.value)}
                   className={inp}
+                />
+              </div>
+              <div>
+                <label className={labelStyle}>Headline Font Size</label>
+                <input
+                  type="text"
+                  value={sectionDesigns.promotional_banners?.banner2TitleFontSize || ""}
+                  onChange={(e) => updateSectionToken('promotional_banners', 'banner2TitleFontSize', e.target.value)}
+                  className={`${inp} py-1.5 text-xs`}
+                  placeholder="e.g. 36px or clamp(24px, 2.8vw, 36px)"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -1623,6 +2228,46 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                 />
               </div>
             </div>
+
+            {/* Dynamic Typography & Font Sizes */}
+            <div className={`p-4 rounded-xl border space-y-3 ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Typography Font Sizes (Customizable)</h4>
+                <span className="text-[11px] text-slate-400 font-mono">Headings: Cormorant Garamond · Body: Montserrat</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Eyebrow Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.brand_story?.eyebrowFontSize || ""}
+                    onChange={(e) => updateSectionToken('brand_story', 'eyebrowFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 11px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Headline Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.brand_story?.titleFontSize || ""}
+                    onChange={(e) => updateSectionToken('brand_story', 'titleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 42px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Story Body Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.brand_story?.descFontSize || ""}
+                    onChange={(e) => updateSectionToken('brand_story', 'descFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 13.5px"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1666,6 +2311,46 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                   onChange={(e) => updateSectionToken('testimonials', 'title', e.target.value)}
                   className={inp}
                 />
+              </div>
+            </div>
+
+            {/* Dynamic Typography & Font Sizes */}
+            <div className={`p-4 rounded-xl border space-y-3 ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Typography Font Sizes (Customizable)</h4>
+                <span className="text-[11px] text-slate-400 font-mono">Headings: Cormorant Garamond · Body: Montserrat</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Eyebrow Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.testimonials?.eyebrowFontSize || ""}
+                    onChange={(e) => updateSectionToken('testimonials', 'eyebrowFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 11px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Heading Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.testimonials?.titleFontSize || ""}
+                    onChange={(e) => updateSectionToken('testimonials', 'titleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 40px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Review Quote Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.testimonials?.quoteFontSize || ""}
+                    onChange={(e) => updateSectionToken('testimonials', 'quoteFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 13px"
+                  />
+                </div>
               </div>
             </div>
 
@@ -1839,6 +2524,36 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                 className={inp}
               />
             </div>
+
+            {/* Dynamic Typography & Font Sizes */}
+            <div className={`p-4 rounded-xl border space-y-3 ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Typography Font Sizes (Customizable)</h4>
+                <span className="text-[11px] text-slate-400 font-mono">Headings: Cormorant Garamond · Body: Montserrat</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Eyebrow Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.social_gallery?.eyebrowFontSize || ""}
+                    onChange={(e) => updateSectionToken('social_gallery', 'eyebrowFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 11px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Heading Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.social_gallery?.titleFontSize || ""}
+                    onChange={(e) => updateSectionToken('social_gallery', 'titleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 40px"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1930,6 +2645,36 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                   onChange={(e) => updateSectionToken('newsletter', 'scriptLine2', e.target.value)}
                   className={inp}
                 />
+              </div>
+            </div>
+
+            {/* Dynamic Typography & Font Sizes */}
+            <div className={`p-4 rounded-xl border space-y-3 ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Typography Font Sizes (Customizable)</h4>
+                <span className="text-[11px] text-slate-400 font-mono">Headings: Cormorant Garamond · Body: Montserrat</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Headline Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.newsletter?.titleFontSize || ""}
+                    onChange={(e) => updateSectionToken('newsletter', 'titleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 36px"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Subtitle Body Size</label>
+                  <input
+                    type="text"
+                    value={sectionDesigns.newsletter?.subtitleFontSize || ""}
+                    onChange={(e) => updateSectionToken('newsletter', 'subtitleFontSize', e.target.value)}
+                    className={`${inp} py-1.5 text-xs`}
+                    placeholder="e.g. 14px"
+                  />
+                </div>
               </div>
             </div>
           </div>

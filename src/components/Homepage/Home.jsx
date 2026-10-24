@@ -1,4 +1,7 @@
+import React, { useState, useEffect } from 'react';
 import useSEO from '../../hooks/useSEO';
+import { db } from '../Firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 import Hero from './Hero';
 import CategorySection from './CategorySection';
 import FeaturedBoxBanner from './FeaturedBoxBanner';
@@ -10,7 +13,46 @@ import TestimonialSection from './Testemonials';
 import SocialGallery from './SocialGallery';
 import Newsletter from '../Newsletter';
 
+const SECTION_COMPONENTS = {
+  hero: Hero,
+  category_grid: CategorySection,
+  jewellery_box_banner: FeaturedBoxBanner,
+  bestsellers: BestSellers,
+  trust_benefits: QualitySection,
+  promotional_banners: TheEdit,
+  brand_story: BrandStory,
+  testimonials: TestimonialSection,
+  social_gallery: SocialGallery,
+  newsletter: Newsletter,
+};
+
+const DEFAULT_SECTION_ORDER = [
+  { id: "hero", enabled: true, order: 1 },
+  { id: "category_grid", enabled: true, order: 2 },
+  { id: "jewellery_box_banner", enabled: true, order: 3 },
+  { id: "bestsellers", enabled: true, order: 4 },
+  { id: "trust_benefits", enabled: true, order: 5 },
+  { id: "promotional_banners", enabled: true, order: 6 },
+  { id: "brand_story", enabled: true, order: 7 },
+  { id: "testimonials", enabled: true, order: 8 },
+  { id: "social_gallery", enabled: true, order: 9 },
+  { id: "newsletter", enabled: true, order: 10 },
+];
+
 function Home() {
+  const [sectionsOrder, setSectionsOrder] = useState(DEFAULT_SECTION_ORDER);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "site_settings", "homepage_sections"), (snap) => {
+      if (snap.exists() && Array.isArray(snap.data().sections) && snap.data().sections.length > 0) {
+        setSectionsOrder(snap.data().sections);
+      }
+    }, (err) => {
+      console.warn("Homepage sections listener note:", err);
+    });
+    return () => unsub();
+  }, []);
+
   useSEO({
     title: 'Jewellery & Luxury Organizer Boxes | Zenzies',
     description: 'Discover Zenzies - premium jewellery organizer boxes, fine jewellery, and curated combo bundles crafted for the modern lifestyle. Shop online with secure payments across India.',
@@ -90,18 +132,16 @@ function Home() {
     ]
   });
 
+  const sortedSections = [...sectionsOrder]
+    .filter(s => s && s.enabled !== false && SECTION_COMPONENTS[s.id])
+    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
   return (
     <>
-      <Hero />
-      <CategorySection />
-      <FeaturedBoxBanner />
-      <BestSellers />
-      <QualitySection />
-      <TheEdit />
-      <BrandStory />
-      <TestimonialSection />
-      <SocialGallery />
-      <Newsletter />
+      {sortedSections.map((sec) => {
+        const Component = SECTION_COMPONENTS[sec.id];
+        return <Component key={sec.id} />;
+      })}
     </>
   );
 }

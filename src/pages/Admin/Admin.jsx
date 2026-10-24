@@ -114,7 +114,23 @@ const sortNewest = (rows) => [...rows].sort((a, b) => {
 const Admin = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || searchParams.get("section");
-  const defaultTab = sidebarItems.find(i => i.name.toLowerCase() === initialTab?.toLowerCase())?.name || "Dashboard";
+  const tabMap = {
+    banners: "Banners",
+    banner: "Banners",
+    hero: "Banners",
+    sitesettings: "Banners",
+    homepagedesign: "HomepageDesign",
+    theme: "HomepageDesign",
+    categories: "Categories",
+    subcategories: "SubCategories",
+    collections: "Collections",
+    products: "Products",
+    orders: "Orders",
+    reviews: "Reviews",
+    gallery: "Gallery",
+    blogs: "Blogs",
+  };
+  const defaultTab = tabMap[initialTab?.toLowerCase()] || sidebarItems.find(i => i.name.toLowerCase() === initialTab?.toLowerCase())?.name || "Dashboard";
 
   const [activeItem, setActiveItem] = useState(defaultTab);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -383,6 +399,7 @@ const Admin = () => {
       case "HomepageDesign":
       case "SectionDesign":
       case "Section Design":
+      case "Theme & Design":
         return <HomepageDesignManager isDarkMode={isDarkMode} />;
       case "Products": {
         const activeProducts = products.filter((p) => !p.status || p.status === "Published" || p.status === "Active").length;
@@ -436,6 +453,7 @@ const Admin = () => {
       case "CouponManager":
         return <CouponManager />;
       case "Users":
+      case "Customers":
         return (
           <>
             <MetricCards cards={cards} />
@@ -443,20 +461,25 @@ const Admin = () => {
           </>
         );
       case "Media":
+      case "Media Library":
         return <MediaLibrary />;
       case "Product Images":
       case "ProductImages":
         return <ProductImageManager products={products} isDarkMode={isDarkMode} />;
       case "Blogs":
+      case "Blogs & Journal":
         return <BlogManager />;
       case "Reviews":
+      case "Customer Reviews":
         return <ReviewsManager isDarkMode={isDarkMode} />;
       case "Banners":
       case "Hero Banner":
       case "Hero & Banners":
       case "HeroBanner":
+      case "Homepage Sections":
         return <SiteSettingsManager isDarkMode={isDarkMode} />;
       case "Gallery":
+      case "Community Gallery":
         return <GalleryManager />;
       case "NewsReels":
       case "News & Reels":
@@ -504,29 +527,31 @@ const Admin = () => {
         </div>
       </div>
 
-      <nav className={`flex-1 overflow-y-auto py-4 text-[16px] ${collapsed ? "px-2" : "px-3"}`}>
-        {/* Dashboard */}
+      <nav className={`flex-1 overflow-y-auto py-4 text-[15px] ${collapsed ? "px-2" : "px-3"}`}>
+        {/* OVERVIEW */}
+        {!collapsed && <p className="mb-2 px-3 text-[12px] font-bold tracking-wider uppercase text-white/50">OVERVIEW</p>}
         <button
-          onClick={() => setActiveItem("Dashboard")}
+          onClick={() => handleTabChange("Dashboard")}
           title="Dashboard"
           className={`mb-4 flex w-full items-center rounded-lg font-semibold transition-all ${collapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5"
             } ${activeItem === "Dashboard" ? "bg-[#a4143e] text-white" : "text-white/80 hover:bg-white/10"}`}
         >
-          <LayoutDashboard size={15} />
+          <LayoutDashboard size={16} />
           {!collapsed && "Dashboard"}
         </button>
 
-        {!collapsed && <p className="mb-2 px-3 text-[16px] font-medium tracking-wide text-white/50">CATALOG</p>}
+        {/* CATALOG */}
+        {!collapsed && <p className="mb-2 px-3 text-[12px] font-bold tracking-wider uppercase text-white/50">CATALOG</p>}
         {collapsed && <div className="my-2 border-t border-white/10" />}
 
         {/* Products */}
         <button
-          onClick={() => { setActiveItem("Products"); if (!collapsed) setProductsMenuOpen(!productsMenuOpen); }}
+          onClick={() => { handleTabChange("Products"); if (!collapsed) setProductsMenuOpen(!productsMenuOpen); }}
           title="Products"
           className={`flex w-full items-center rounded-lg font-semibold transition-all ${collapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5"
             } ${activeItem === "Products" || activeItem === "AddProduct" || activeItem === "EditProduct" ? "bg-[#a4143e] text-white" : "text-white/80 hover:bg-white/10"}`}
         >
-          <Package size={15} />
+          <Package size={16} />
           {!collapsed && (
             <>
               <span className="flex-1 text-left">Products</span>
@@ -539,33 +564,26 @@ const Admin = () => {
             {[["All Products", Grid2X2, "Products"], ["Product Images", Images, "Product Images"]].map(([label, Icon, target]) => (
               <button
                 key={label}
-                onClick={() => setActiveItem(target)}
-                className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[16px] ${activeItem === target ? "bg-[#84112f] text-white" : "text-white/75 hover:bg-white/10"}`}
+                onClick={() => handleTabChange(target)}
+                className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[14px] ${activeItem === target ? "bg-[#84112f] text-white" : "text-white/75 hover:bg-white/10"}`}
               >
-                <Icon size={12} />{label}
+                <Icon size={13} />{label}
               </button>
             ))}
           </div>
         )}
 
-        {/* Catalog entries: Orders, Coupon Manager, Tags Manager, Categories, etc */}
+        {/* Categories, Sub Categories, Collections, Attributes, Media */}
         {[
-          ["Orders", ShoppingBag, "Orders"],
-          ["Stock Notifications", Bell, "Stock Notifications"],
-          ["Coupon Manager", TicketPercent, "Coupon Manager"],
-          ["Tags Manager", Tags, "Tags Manager"],
-          ["Product Images", Images, "Product Images"],
-          ["Gallery", Camera, "Gallery"],
           ["Categories", Layers3, "Categories"],
           ["Sub Categories", Layers3, "SubCategories"],
           ["Collections", Layers3, "Collections"],
-          ["Countries", Globe2, "Countries"],        // ← was Brands
           ["Attributes", Tags, "Attributes"],
-          ["Media", Images, "Media"],
+          ["Media Library", Images, "Media"],
         ].map(([title, Icon, target]) => (
           <div key={title} className="mt-1">
             <button
-              onClick={() => setActiveItem(target)}
+              onClick={() => handleTabChange(target)}
               title={title}
               className={`flex w-full items-center rounded-lg transition-all ${collapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2"
                 } ${activeItem === target ? "bg-[#a4143e] text-white" : "text-white/80 hover:bg-white/10"}`}
@@ -576,35 +594,52 @@ const Admin = () => {
           </div>
         ))}
 
-        {!collapsed && (
-          <>
-            <p className="mb-2 mt-4 px-3 text-[16px] font-medium tracking-wide text-white/50">CONTENT</p>
-            {[["Section Design", Palette, "HomepageDesign"], ["Hero & Banners", Images, "Banners"], ["News Reels", Video, "NewsReels"], ["Pages", FileText, "Pages"], ["Blogs", FileText, "Blogs"], ["Reviews", Star, "Reviews"]].map(([label, Icon, target]) => (
-              <button
-                key={label}
-                onClick={() => setActiveItem(target)}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-white/80 hover:bg-white/10 ${activeItem === target ? "bg-[#a4143e]" : ""}`}
-              >
-                <Icon size={15} />{label}
-              </button>
-            ))}
-          </>
-        )}
-        {collapsed && (
-          <>
-            <div className="my-2 border-t border-white/10" />
-            {[["Section Design", Palette, "HomepageDesign"], ["Hero & Banners", Images, "Banners"], ["News Reels", Video, "NewsReels"], ["Pages", FileText, "Pages"], ["Blogs", FileText, "Blogs"], ["Reviews", Star, "Reviews"]].map(([label, Icon, target]) => (
-              <button
-                key={label}
-                title={label}
-                onClick={() => setActiveItem(target)}
-                className={`flex w-full items-center justify-center rounded-lg px-2 py-2.5 text-white/80 hover:bg-white/10 mt-1 ${activeItem === target ? "bg-[#a4143e]" : ""}`}
-              >
-                <Icon size={15} />
-              </button>
-            ))}
-          </>
-        )}
+        {/* HOMEPAGE CONTENT */}
+        {!collapsed && <p className="mb-2 mt-5 px-3 text-[12px] font-bold tracking-wider uppercase text-white/50">HOMEPAGE CONTENT</p>}
+        {collapsed && <div className="my-2 border-t border-white/10" />}
+        {[
+          ["Homepage Sections", Images, "Banners"],
+          ["Theme & Design", Palette, "HomepageDesign"],
+          ["Community Gallery", Camera, "Gallery"],
+          ["Customer Reviews", Star, "Reviews"],
+          ["Blogs & Journal", FileText, "Blogs"],
+          ["News & Reels", Video, "NewsReels"],
+        ].map(([title, Icon, target]) => (
+          <div key={title} className="mt-1">
+            <button
+              onClick={() => handleTabChange(target)}
+              title={title}
+              className={`flex w-full items-center rounded-lg transition-all ${collapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2"
+                } ${activeItem === target ? "bg-[#a4143e] text-white" : "text-white/80 hover:bg-white/10"}`}
+            >
+              <Icon size={15} />
+              {!collapsed && <span className="flex-1 text-left">{title}</span>}
+            </button>
+          </div>
+        ))}
+
+        {/* STORE OPERATIONS */}
+        {!collapsed && <p className="mb-2 mt-5 px-3 text-[12px] font-bold tracking-wider uppercase text-white/50">STORE OPERATIONS</p>}
+        {collapsed && <div className="my-2 border-t border-white/10" />}
+        {[
+          ["Orders", ShoppingBag, "Orders"],
+          ["Customers", Users, "Users"],
+          ["Stock Notifications", Bell, "Stock Notifications"],
+          ["Coupon Manager", TicketPercent, "Coupon Manager"],
+          ["Tags Manager", Tags, "Tags Manager"],
+        ].map(([title, Icon, target]) => (
+          <div key={title} className="mt-1">
+            <button
+              onClick={() => handleTabChange(target)}
+              title={title}
+              className={`flex w-full items-center rounded-lg transition-all ${collapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2"
+                } ${activeItem === target ? "bg-[#a4143e] text-white" : "text-white/80 hover:bg-white/10"}`}
+            >
+              <Icon size={15} />
+              {!collapsed && <span className="flex-1 text-left">{title}</span>}
+            </button>
+          </div>
+        ))}
       </nav>
 
       {/* Footer: collapse toggle + profile + logout */}

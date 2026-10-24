@@ -84,7 +84,7 @@ const BestSellers = () => {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
 
-  const { design, containerStyle, overlayStyle, isEnabled } = useSectionDesign('bestsellers', {
+  const { design, containerStyle, overlayStyle, btnGradient, btnStyle, isEnabled } = useSectionDesign('bestsellers', {
     backgroundColor: '#FBF7F2',
     paddingTop: '44px',
     paddingBottom: '52px',
@@ -180,26 +180,26 @@ const BestSellers = () => {
         <div className="absolute inset-0 pointer-events-none z-0" style={overlayStyle} />
       )}
 
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
+      <div className="w-full max-w-[1640px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 relative z-10">
 
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-9 gap-3">
           <div className="text-left">
             <span
               className="text-[10px] sm:text-[11px] font-sans font-semibold tracking-[0.2em] uppercase block mb-1.5 sm:mb-2"
-              style={{ color: design.accentColor || '#956638' }}
+              style={{ color: design.accentColor || '#956638', fontSize: design.eyebrowFontSize || undefined }}
             >
               {eyebrow}
             </span>
             <h2
               className="font-serif text-[30px] sm:text-[36px] lg:text-[40px] font-normal leading-[1.08] tracking-tight m-0"
-              style={{ color: design.titleColor || '#211A16' }}
+              style={{ color: design.titleColor || '#211A16', fontSize: design.titleFontSize || undefined }}
             >
               {heading}
             </h2>
             <p
               className="text-xs sm:text-[13.5px] font-sans mt-1.5 sm:mt-2"
-              style={{ color: design.subtitleColor || design.textColor || '#62564B' }}
+              style={{ color: design.subtitleColor || design.textColor || '#62564B', fontSize: design.subtitleFontSize || undefined }}
             >
               {description}
             </p>
@@ -269,9 +269,10 @@ const BestSellers = () => {
             breakpoints={{
               640: { slidesPerView: 2, spaceBetween: 14 },
               768: { slidesPerView: 3, spaceBetween: 16 },
-              1024: { slidesPerView: 4, spaceBetween: 18 },
+              1024: { slidesPerView: 4, spaceBetween: 20 },
+              1280: { slidesPerView: 5, spaceBetween: 22 },
             }}
-            className="!overflow-visible"
+            className="!overflow-visible py-2"
           >
             {products.map((product, index) => {
               const inWishlist = isInWishlist ? isInWishlist(product.id) : false;
@@ -287,13 +288,14 @@ const BestSellers = () => {
                 <SwiperSlide key={product.id || index}>
                   {/*
                     PRODUCT CARD
-                    - Visibly curved upper corners: rounded-[14px] overflow-hidden
-                    - Matching top corner radii on image wrapper
-                    - Hover: translateY(-3px), scale image 1.035
+                    - 3D Elevated lift on hover (uth kar aa raha ho): -translate-y-3 & scale-1015
+                    - Ambient luxury shadow & deep hover shadow matching reference image
+                    - Zoom on product image: scale-110
+                    - Gradient button
                   */}
                   <div
                     onClick={() => navigate(`/product/${product.id}`)}
-                    className="group relative flex flex-col h-full rounded-[14px] border border-[#E8DDD2] bg-white overflow-hidden shadow-[0_2px_8px_rgba(33,26,22,0.04)] hover:shadow-[0_6px_18px_rgba(33,26,22,0.08)] transition-all duration-250 ease-out cursor-pointer text-center hover:-translate-y-1"
+                    className="group relative flex flex-col h-full rounded-[14px] border border-[#E8DDD2]/85 bg-white overflow-hidden shadow-[0_4px_18px_rgba(33,26,22,0.06),0_1px_3px_rgba(33,26,22,0.04)] hover:shadow-[0_22px_40px_-6px_rgba(33,26,22,0.18),0_12px_20px_-4px_rgba(33,26,22,0.1)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer text-center hover:-translate-y-2.5 sm:hover:-translate-y-3 hover:scale-[1.018] will-change-transform"
                     style={{
                       borderRadius: design.cardBorderRadius || '14px',
                       backgroundColor: design.cardBackgroundColor || '#FFFFFF',
@@ -304,10 +306,10 @@ const BestSellers = () => {
                       Image Container
                       - Visible rounded upper corners: rounded-t-[13px]
                       - Light warm neutral backdrop: #FAF6F0
-                      - Contained image with subtle 1.035 hover zoom
+                      - Contained image with smooth zoom on hover
                     */}
                     <div
-                      className="relative aspect-square w-full overflow-hidden bg-[#FAF6F0] p-3 sm:p-4 flex items-center justify-center rounded-t-[13px]"
+                      className="relative aspect-square w-full overflow-hidden bg-[#FAF6F0] p-3.5 sm:p-5 flex items-center justify-center rounded-t-[13px]"
                       style={{
                         borderTopLeftRadius: design.cardBorderRadius || '13px',
                         borderTopRightRadius: design.cardBorderRadius || '13px',
@@ -319,7 +321,7 @@ const BestSellers = () => {
                         loading="lazy"
                         decoding="async"
                         onError={(e) => handleImageError(e, rawImg)}
-                        className="w-full h-full object-contain transition-transform duration-250 ease-out group-hover:scale-[1.035]"
+                        className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-110"
                       />
 
                       {/* Wishlist Button in Top-Right Corner */}
@@ -344,7 +346,7 @@ const BestSellers = () => {
                     </div>
 
                     {/* Product Details - Centered alignment as in reference screenshot */}
-                    <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between items-center text-center space-y-2">
+                    <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between items-center text-center space-y-2">
                       <div className="w-full flex flex-col items-center">
                         {/* Title */}
                         <h3 className="text-xs sm:text-[13.5px] font-sans font-medium text-[#211A16] group-hover:text-[#956638] transition-colors truncate w-full text-center">
@@ -382,20 +384,20 @@ const BestSellers = () => {
                         </div>
                       </div>
 
-                      {/* Add to Cart Button */}
+                      {/* Add to Cart Button with Luxury Gradient */}
                       <button
                         type="button"
                         onClick={(e) => handleAddToCart(e, product)}
                         disabled={isSoldOut || isCartLoading}
-                        className={`w-full py-2 sm:py-2.5 px-3 rounded-[5px] text-xs font-sans font-semibold tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer mt-1 ${
+                        className={`w-full py-2.5 sm:py-3 px-3 rounded-[6px] text-xs font-sans font-semibold tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer mt-1 active:scale-95 shadow-sm hover:brightness-105 hover:shadow-md ${
                           isSoldOut
                             ? 'bg-[#E8DDD2] text-[#6B5E52] cursor-not-allowed'
-                            : 'bg-[#956638] hover:bg-[#7D532B] hover:shadow-sm text-white active:scale-95'
+                            : 'text-white'
                         }`}
                         style={{
-                          backgroundColor: isSoldOut ? '#E8DDD2' : (design.btnBgColor || design.accentColor || '#956638'),
-                          color: isSoldOut ? '#6B5E52' : '#FFFFFF',
-                          borderRadius: design.btnBorderRadius || '5px',
+                          background: isSoldOut ? '#E8DDD2' : (design.btnGradient || btnGradient),
+                          color: isSoldOut ? '#6B5E52' : (design.btnTextColor || '#FFFFFF'),
+                          borderRadius: design.btnBorderRadius || '6px',
                         }}
                       >
                         {isCartLoading ? (

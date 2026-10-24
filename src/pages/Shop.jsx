@@ -691,11 +691,11 @@ const Shop = () => {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.4, delay: (index % 4) * 0.05 }}
-                      className="group flex flex-col h-full rounded-2xl border border-[#EFE8DC] bg-[#FFFDF9] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.02)] hover:shadow-[0_14px_35px_rgba(0,0,0,0.08)] hover:border-[#D5C6B1] transition-all duration-300 cursor-pointer"
+                      className="group flex flex-col h-full rounded-2xl border border-[#E8DDD2]/90 bg-[#FFFDF9] overflow-hidden shadow-[0_4px_18px_rgba(33,26,22,0.06)] hover:shadow-[0_20px_38px_-6px_rgba(33,26,22,0.18)] hover:-translate-y-2.5 hover:scale-[1.015] hover:border-[#8C6239]/50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer will-change-transform"
                       onClick={() => navigate(`/product/${product.id}`)}
                     >
                       {/* Image Box */}
-                      <div className="relative aspect-square w-full overflow-hidden bg-[#F3ECE1] border-b border-[#EBE3D7]/60">
+                      <div className="relative aspect-square w-full overflow-hidden bg-[#FAF6F0] border-b border-[#EBE3D7]/60">
                         {(() => {
                           const rawImg = product.image || product.images?.[0] || 'img/jewellery/j.png';
                           return (
@@ -705,7 +705,7 @@ const Shop = () => {
                               loading="lazy"
                               decoding="async"
                               onError={(e) => handleImageError(e, rawImg)}
-                              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                              className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                             />
                           );
                         })()}
@@ -746,7 +746,8 @@ const Shop = () => {
                             <button
                               onClick={(e) => handleAddToCart(e, product)}
                               disabled={cartLoadings[product.id]}
-                              className="w-full py-2.5 text-[11px] tracking-[0.2em] font-semibold uppercase flex items-center justify-center gap-2 rounded-lg border border-transparent bg-[#2A2623] text-white hover:bg-[#2e0e43] transition-colors duration-300 shadow-md cursor-pointer"
+                              style={{ background: 'var(--btn-gradient)' }}
+                              className="w-full py-2.5 text-[11px] tracking-[0.2em] font-semibold uppercase flex items-center justify-center gap-2 rounded-lg text-white shadow-md hover:brightness-105 active:scale-95 transition-all duration-200 cursor-pointer"
                             >
                               {cartLoadings[product.id] ? (
                                 <Loader2 size={12} className="animate-spin" />

@@ -14,7 +14,7 @@ const DEFAULT_FEATURES = [
 ];
 
 const FeaturedBoxBanner = () => {
-  const { design, containerStyle, overlayStyle, isEnabled } = useSectionDesign('jewellery_box_banner', {
+  const { design, containerStyle, overlayStyle, btnGradient, isEnabled } = useSectionDesign('jewellery_box_banner', {
     backgroundColor: '#FBF7F2',
     backgroundImage: DEFAULT_BANNER_BG,
     backgroundSize: 'cover',
@@ -69,7 +69,7 @@ const FeaturedBoxBanner = () => {
       {/* Subtle responsive gradient protection to guarantee text legibility across all viewport widths */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#FBF7F2]/95 via-[#FBF7F2]/75 to-transparent md:via-[#FBF7F2]/45 lg:via-[#FBF7F2]/20 pointer-events-none z-[1]" />
 
-      <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 relative z-10 py-12 sm:py-14 lg:py-16">
+      <div className="w-full max-w-[1640px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 relative z-10 py-12 sm:py-14 lg:py-16">
         <div className="max-w-[440px] sm:max-w-[480px] lg:max-w-[520px] text-left">
 
           {/* Eyebrow */}
@@ -82,7 +82,7 @@ const FeaturedBoxBanner = () => {
           >
             <span
               className="text-[10px] sm:text-[11px] font-sans font-semibold tracking-[0.22em] uppercase inline-block"
-              style={{ color: design.accentColor || '#956638' }}
+              style={{ color: design.accentColor || '#956638', fontSize: design.eyebrowFontSize || undefined }}
             >
               {eyebrow}
             </span>
@@ -95,6 +95,7 @@ const FeaturedBoxBanner = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.55, delay: 0.05 }}
             className="font-serif text-[34px] sm:text-[42px] lg:text-[48px] xl:text-[52px] font-normal leading-[1.02] tracking-[-0.02em] m-0"
+            style={{ fontSize: design.titleFontSize || undefined }}
           >
             <span
               className="block"
@@ -117,7 +118,7 @@ const FeaturedBoxBanner = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.55, delay: 0.1 }}
             className="text-xs sm:text-[13.5px] lg:text-[14px] font-sans leading-[1.55] max-w-[360px] sm:max-w-[420px] mt-3.5 sm:mt-4 mb-4 sm:mb-5"
-            style={{ color: design.subtitleColor || design.textColor || '#62564B' }}
+            style={{ color: design.subtitleColor || design.textColor || '#62564B', fontSize: design.subtitleFontSize || undefined }}
           >
             {subtitle}
           </motion.p>
@@ -144,7 +145,7 @@ const FeaturedBoxBanner = () => {
                   </span>
                   <span
                     className="text-[12px] sm:text-[13px] font-sans font-medium leading-tight"
-                    style={{ color: design.textColor || '#62564B' }}
+                    style={{ color: design.textColor || '#62564B', fontSize: design.featuresFontSize || undefined }}
                   >
                     {feature.text}
                   </span>
@@ -153,7 +154,7 @@ const FeaturedBoxBanner = () => {
             </motion.div>
           )}
 
-          {/* Shop Jewelry Boxes CTA */}
+          {/* Shop Jewelry Boxes CTA with Luxury Gradient */}
           {btnEnabled && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -163,9 +164,9 @@ const FeaturedBoxBanner = () => {
             >
               <Link
                 to={btnLink}
-                className="inline-flex items-center gap-2 h-[42px] sm:h-[46px] px-5 sm:px-6 rounded-[5px] text-white text-xs sm:text-[13px] font-sans font-semibold tracking-wide transition-all duration-200 shadow-sm hover:shadow hover:brightness-105 active:scale-95 group"
+                className="inline-flex items-center gap-2 h-[44px] sm:h-[48px] px-6 sm:px-7 rounded-[6px] text-white text-xs sm:text-[13.5px] font-sans font-semibold tracking-wide transition-all duration-200 shadow-md hover:shadow-lg hover:brightness-105 active:scale-95 group"
                 style={{
-                  backgroundColor: design.btnBgColor || design.accentColor || '#956638',
+                  background: design.btnGradient || btnGradient,
                   color: design.btnTextColor || '#FFFFFF'
                 }}
               >

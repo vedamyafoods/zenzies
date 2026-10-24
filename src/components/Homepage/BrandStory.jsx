@@ -7,7 +7,7 @@ import useSectionDesign from '../../hooks/useSectionDesign';
 const DEFAULT_STORY_IMG = "/img/zenzies/jeweler_craftsmanship.jpg";
 
 const BrandStory = () => {
-  const { design, containerStyle, overlayStyle, isEnabled } = useSectionDesign('brand_story', {
+  const { design, containerStyle, overlayStyle, btnGradient, isEnabled } = useSectionDesign('brand_story', {
     backgroundColor: '#FAF7F2',
     paddingTop: '10px',
     paddingBottom: '10px',
@@ -38,7 +38,6 @@ const BrandStory = () => {
   const accentColor = design.accentColor || '#8C6239';
   const titleColor = design.titleColor || '#211A16';
   const textColor = design.textColor || design.subtitleColor || '#5A5046';
-  const btnBgColor = design.btnBgColor || '#8C6239';
 
   return (
     <section
@@ -54,7 +53,7 @@ const BrandStory = () => {
         <div className="absolute inset-0 pointer-events-none z-0" style={overlayStyle} />
       )}
 
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
+      <div className="w-full max-w-[1640px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
 
           {/* ─── Left Column: Brand Story Content ─────────────────────────── */}
@@ -68,7 +67,7 @@ const BrandStory = () => {
             {/* Eyebrow */}
             <span
               className="text-[11px] font-sans font-semibold tracking-[0.22em] uppercase block"
-              style={{ color: accentColor }}
+              style={{ color: accentColor, fontSize: design.eyebrowFontSize || undefined }}
             >
               {eyebrow}
             </span>
@@ -76,7 +75,7 @@ const BrandStory = () => {
             {/* Main Headline */}
             <h2
               className="font-serif text-3xl sm:text-4xl lg:text-[42px] xl:text-[44px] font-normal leading-[1.15] tracking-tight whitespace-pre-line"
-              style={{ color: titleColor }}
+              style={{ color: titleColor, fontSize: design.titleFontSize || undefined }}
             >
               {title}
             </h2>
@@ -84,18 +83,18 @@ const BrandStory = () => {
             {/* Description Body */}
             <p
               className="text-xs sm:text-[13.5px] font-sans leading-[1.75] max-w-lg"
-              style={{ color: textColor }}
+              style={{ color: textColor, fontSize: design.descFontSize || undefined }}
             >
               {description}
             </p>
 
-            {/* CTA Button */}
+            {/* CTA Button with Luxury Gradient */}
             {design.btnEnabled !== false && (
               <div className="pt-2">
                 <Link
                   to={btnLink}
-                  style={{ backgroundColor: btnBgColor }}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-[4px] text-white text-xs sm:text-sm font-sans font-semibold tracking-wide hover:brightness-105 hover:shadow-md transition-all shadow-xs"
+                  style={{ background: design.btnGradient || btnGradient, color: design.btnTextColor || '#FFFFFF' }}
+                  className="inline-flex items-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-[6px] text-white text-xs sm:text-sm font-sans font-semibold tracking-wide hover:brightness-105 hover:shadow-lg transition-all shadow-md active:scale-95"
                 >
                   <span>{btnText}</span>
                   <ArrowRight size={14} />

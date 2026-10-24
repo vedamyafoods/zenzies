@@ -12,7 +12,7 @@ const Newsletter = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { design, containerStyle, overlayStyle, isEnabled } = useSectionDesign('newsletter', {
+  const { design, containerStyle, overlayStyle, btnGradient, isEnabled } = useSectionDesign('newsletter', {
     backgroundColor: '#E9D9C7',
     paddingTop: '40px',
     paddingBottom: '56px',
@@ -50,20 +50,20 @@ const Newsletter = () => {
       {overlayStyle && (
         <div className="absolute inset-0 pointer-events-none z-0" style={overlayStyle} />
       )}
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
+      <div className="w-full max-w-[1640px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
           {/* Left Column: Copy & Input Form */}
           <div className="lg:col-span-7 space-y-4 text-left">
             <h2
               className="font-serif text-3xl sm:text-4xl font-normal leading-tight"
-              style={{ color: design.titleColor || '#211A16' }}
+              style={{ color: design.titleColor || '#211A16', fontSize: design.titleFontSize || undefined }}
             >
               {title}
             </h2>
             <p
               className="text-xs sm:text-sm font-sans leading-relaxed max-w-lg"
-              style={{ color: design.subtitleColor || '#6B5E52' }}
+              style={{ color: design.subtitleColor || '#6B5E52', fontSize: design.subtitleFontSize || undefined }}
             >
               {subtitle}
             </p>
@@ -91,8 +91,8 @@ const Newsletter = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-3 sm:py-3.5 rounded-[6px] text-white text-xs sm:text-sm font-sans font-semibold tracking-wide transition-all shadow-xs shrink-0 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
-                    style={{ backgroundColor: design.btnBgColor || design.accentColor || '#956638' }}
+                    className="px-6 sm:px-7 py-3 sm:py-3.5 rounded-[6px] text-white text-xs sm:text-sm font-sans font-semibold tracking-wide transition-all shadow-md hover:brightness-105 hover:shadow-lg shrink-0 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60 active:scale-95"
+                    style={{ background: design.btnGradient || btnGradient, color: design.btnTextColor || '#FFFFFF' }}
                   >
                     {loading ? (
                       <Loader2 size={14} className="animate-spin" />

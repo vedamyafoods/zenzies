@@ -70,6 +70,10 @@ const Hero = () => {
           btn1Link: data.btn1Link || DEFAULT_HERO.btn1Link,
           btn2Text: data.btn2Text || DEFAULT_HERO.btn2Text,
           btn2Link: data.btn2Link || DEFAULT_HERO.btn2Link,
+          eyebrowFontSize: data.eyebrowFontSize || "",
+          titleFontSize: data.titleFontSize || "",
+          subtitleFontSize: data.subtitleFontSize || "",
+          badgeFontSize: data.badgeFontSize || "",
           benefits: Array.isArray(data.benefits) && data.benefits.length > 0
             ? data.benefits
             : DEFAULT_HERO_BENEFITS,
@@ -136,7 +140,7 @@ const Hero = () => {
         className="absolute inset-0 pointer-events-none z-0 bg-[#FAF6F0]/92 lg:hidden"
       />
 
-      <div className="w-full max-w-[1360px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-14 py-12 sm:py-14 lg:py-16 relative z-10">
+      <div className="w-full max-w-[1640px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-12 sm:py-14 lg:py-16 relative z-10">
         <div className="w-full lg:max-w-[560px] xl:max-w-[640px] 2xl:max-w-[700px] text-left">
 
           {/* Eyebrow text */}
@@ -147,7 +151,10 @@ const Hero = () => {
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               className="mb-5 sm:mb-6"
             >
-              <span className="font-sans text-xs sm:text-[13px] lg:text-[14px] font-semibold tracking-[0.24em] text-[#956638] uppercase block">
+              <span
+                className="font-sans text-xs sm:text-[13px] lg:text-[14px] font-semibold tracking-[0.24em] text-[#956638] uppercase block"
+                style={{ fontSize: heroConfig.eyebrowFontSize || undefined }}
+              >
                 {heroConfig.eyebrow}
               </span>
             </motion.div>
@@ -160,7 +167,7 @@ const Hero = () => {
             transition={{ duration: 0.6, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
             className="font-serif font-medium tracking-tight m-0"
             style={{
-              fontSize: 'clamp(42px, 5.2vw, 92px)',
+              fontSize: heroConfig.titleFontSize || 'clamp(42px, 5.2vw, 92px)',
               lineHeight: 1.0,
               letterSpacing: '-0.025em',
             }}
@@ -180,7 +187,7 @@ const Hero = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.16, ease: [0.16, 1, 0.3, 1] }}
               className="font-sans font-normal text-[#62564B] mt-5 sm:mt-6 mb-7 sm:mb-8 leading-[1.6] max-w-[580px]"
-              style={{ fontSize: 'clamp(15px, 1.3vw, 21px)' }}
+              style={{ fontSize: heroConfig.subtitleFontSize || 'clamp(15px, 1.3vw, 21px)' }}
             >
               {heroConfig.subtitle}
             </motion.p>
@@ -197,8 +204,11 @@ const Hero = () => {
             {heroConfig.btn1Text && (
               <Link
                 to={heroConfig.btn1Link || "/shop"}
-                className="inline-flex items-center justify-center gap-4 px-7 sm:px-8 py-3.5 sm:py-4 rounded-[8px] bg-[#B8752A] hover:bg-[#9E621F] text-white font-sans text-sm sm:text-base font-semibold transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#B8752A] focus:ring-offset-2"
-                style={{ minHeight: '52px' }}
+                className="inline-flex items-center justify-center gap-4 px-7 sm:px-8 py-3.5 sm:py-4 rounded-[8px] text-white font-sans text-sm sm:text-base font-semibold transition-all duration-200 shadow-md hover:shadow-lg hover:brightness-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#A26B38] focus:ring-offset-2"
+                style={{
+                  minHeight: '52px',
+                  background: heroConfig.btn1Gradient || heroConfig.btnGradient || 'linear-gradient(135deg, #A26B38 0%, #7B4F26 100%)',
+                }}
               >
                 <span>{heroConfig.btn1Text}</span>
                 <ArrowRight size={17} />
@@ -209,11 +219,11 @@ const Hero = () => {
             {heroConfig.btn2Text && (
               <Link
                 to={heroConfig.btn2Link || "/shop?category=Jewellery+Boxes"}
-                className="inline-flex items-center justify-center gap-4 px-7 sm:px-8 py-3.5 sm:py-4 rounded-[8px] bg-transparent hover:bg-[#F3E4DA]/40 border-2 border-[#B8752A] text-[#956638] font-sans text-sm sm:text-base font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B8752A] focus:ring-offset-2"
+                className="inline-flex items-center justify-center gap-4 px-7 sm:px-8 py-3.5 sm:py-4 rounded-[8px] bg-white/70 hover:bg-[#F3E4DA]/60 border-2 border-[#A26B38] text-[#7B4F26] font-sans text-sm sm:text-base font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#A26B38] focus:ring-offset-2 shadow-xs"
                 style={{ minHeight: '52px' }}
               >
                 <span>{heroConfig.btn2Text}</span>
-                <ArrowRight size={17} className="text-[#956638]" />
+                <ArrowRight size={17} className="text-[#7B4F26]" />
               </Link>
             )}
           </motion.div>
@@ -235,7 +245,10 @@ const Hero = () => {
                     )}
                     <div className="flex items-center gap-2.5">
                       <IconComponent size={26} strokeWidth={1.5} className="text-[#B8752A] shrink-0" />
-                      <span className="font-sans text-xs sm:text-[13px] font-medium leading-tight whitespace-pre-line text-[#62564B]">
+                      <span
+                        className="font-sans text-xs sm:text-[13px] font-medium leading-tight whitespace-pre-line text-[#62564B]"
+                        style={{ fontSize: heroConfig.badgeFontSize || undefined }}
+                      >
                         {benefit.text}
                       </span>
                     </div>

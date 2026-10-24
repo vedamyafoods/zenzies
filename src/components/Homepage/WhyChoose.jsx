@@ -71,7 +71,7 @@ const QualitySection = () => {
         <div className="absolute inset-0 pointer-events-none z-0" style={overlayStyle} />
       )}
 
-      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
+      <div className="w-full max-w-[1640px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 relative z-10">
         <div
           className={`grid gap-y-4 gap-x-4 sm:gap-x-6 items-center ${
             items.length === 4
@@ -108,13 +108,13 @@ const QualitySection = () => {
                 <div className="min-w-0 pr-1">
                   <h4
                     className="text-xs sm:text-[13px] font-sans font-semibold leading-tight truncate tracking-tight"
-                    style={{ color: titleColor }}
+                    style={{ color: titleColor, fontSize: design.titleFontSize || undefined }}
                   >
                     {item.title}
                   </h4>
                   <p
                     className="text-[11px] sm:text-[12px] font-sans leading-snug truncate mt-0.5"
-                    style={{ color: descColor }}
+                    style={{ color: descColor, fontSize: design.descFontSize || undefined }}
                   >
                     {item.desc}
                   </p>

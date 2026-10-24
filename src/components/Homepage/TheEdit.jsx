@@ -31,7 +31,7 @@ const DEFAULT_BANNER2 = {
 };
 
 const TheEdit = () => {
-  const { design, containerStyle, overlayStyle, isEnabled } = useSectionDesign('promotional_banners', {
+  const { design, containerStyle, overlayStyle, btnGradient, isEnabled } = useSectionDesign('promotional_banners', {
     enabled: true,
     fullWidth: true,
     bannerHeight: '480px',
@@ -73,6 +73,7 @@ const TheEdit = () => {
     eyebrow: design.banner1Eyebrow !== undefined ? design.banner1Eyebrow : DEFAULT_BANNER1.eyebrow,
     title: design.banner1Title || DEFAULT_BANNER1.title,
     titleColor: design.banner1TitleColor || DEFAULT_BANNER1.titleColor,
+    titleFontSize: design.banner1TitleFontSize || '',
     btnText: design.banner1BtnText || DEFAULT_BANNER1.btnText,
     btnLink: design.banner1BtnLink || DEFAULT_BANNER1.btnLink,
     btnBgColor: design.banner1BtnBgColor || DEFAULT_BANNER1.btnBgColor,
@@ -87,6 +88,7 @@ const TheEdit = () => {
     eyebrow: design.banner2Eyebrow !== undefined ? design.banner2Eyebrow : DEFAULT_BANNER2.eyebrow,
     title: design.banner2Title || DEFAULT_BANNER2.title,
     titleColor: design.banner2TitleColor || DEFAULT_BANNER2.titleColor,
+    titleFontSize: design.banner2TitleFontSize || '',
     btnText: design.banner2BtnText || DEFAULT_BANNER2.btnText,
     btnLink: design.banner2BtnLink || DEFAULT_BANNER2.btnLink,
     btnBgColor: design.banner2BtnBgColor || DEFAULT_BANNER2.btnBgColor,
@@ -171,7 +173,7 @@ const TheEdit = () => {
 
               <h3
                 className="font-serif text-3xl sm:text-4xl lg:text-[40px] xl:text-[44px] font-normal leading-[1.12] tracking-tight whitespace-pre-line"
-                style={{ color: banner1.titleColor }}
+                style={{ color: banner1.titleColor, fontSize: banner1.titleFontSize || undefined }}
               >
                 {banner1.title}
               </h3>
@@ -180,10 +182,10 @@ const TheEdit = () => {
                 <Link
                   to={banner1.btnLink}
                   style={{
-                    backgroundColor: banner1.btnBgColor,
-                    color: banner1.btnTextColor,
+                    background: banner1.btnBgColor && banner1.btnBgColor !== '#8C6239' ? banner1.btnBgColor : btnGradient,
+                    color: banner1.btnTextColor || '#FFFFFF',
                   }}
-                  className="inline-flex items-center gap-2.5 px-6 py-3 rounded-[4px] text-xs sm:text-sm font-sans font-semibold tracking-wide shadow-sm hover:brightness-105 hover:shadow-md transition-all duration-200"
+                  className="inline-flex items-center gap-2.5 px-6 sm:px-7 py-3 sm:py-3.5 rounded-[6px] text-xs sm:text-sm font-sans font-semibold tracking-wide shadow-md hover:brightness-105 hover:shadow-lg transition-all duration-200 active:scale-95 text-white"
                 >
                   <span>{banner1.btnText}</span>
                   <ArrowRight size={15} strokeWidth={2} />
@@ -235,7 +237,7 @@ const TheEdit = () => {
 
               <h3
                 className="font-serif text-3xl sm:text-4xl lg:text-[40px] xl:text-[44px] font-normal leading-[1.12] tracking-tight whitespace-pre-line"
-                style={{ color: banner2.titleColor }}
+                style={{ color: banner2.titleColor, fontSize: banner2.titleFontSize || undefined }}
               >
                 {banner2.title}
               </h3>

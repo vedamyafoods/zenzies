@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Alex+Brush&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 
 @tailwind base;
@@ -7,8 +7,8 @@
 
 @layer base {
   :root {
-    --font-serif: "Playfair Display", Georgia, serif;
-    --font-sans: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-serif: "Cormorant Garamond", Georgia, serif;
+    --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --font-script: "Alex Brush", cursive;
 
     /* Zenzies Approved Palette */
@@ -27,6 +27,13 @@
     --color-bg-dark: var(--color-espresso);
     --color-bg-paper: var(--color-warm-ivory);
     --color-text-dim: var(--color-muted-taupe);
+
+    /* Dynamic Button Gradient Tokens */
+    --btn-gradient-from: #A26B38;
+    --btn-gradient-to: #7B4F26;
+    --btn-gradient-angle: 135deg;
+    --btn-gradient: linear-gradient(var(--btn-gradient-angle), var(--btn-gradient-from) 0%, var(--btn-gradient-to) 100%);
+    --btn-gradient-hover: linear-gradient(var(--btn-gradient-angle), #B57B44 0%, #8C5B2E 100%);
   }
 
   html, body {
@@ -44,11 +51,15 @@
     font-variant-numeric: lining-nums tabular-nums;
   }
 
-  h1, h2, h3, h4, h5, h6, .font-serif {
+  h1, h2, h3, h4, h5, h6, .font-serif, [class*="font-serif"] {
     font-family: var(--font-serif);
     font-weight: 500;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.01em;
     font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  p, span, a, button, input, label, select, textarea, div {
+    font-family: var(--font-sans);
   }
 
   .font-script {
@@ -56,8 +67,11 @@
   }
 }
 
-/* Register Zenzies colors in Tailwind v4 */
+/* Register Zenzies colors & typography in Tailwind v4 */
 @theme {
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-script: "Alex Brush", cursive;
   --color-warm-ivory: #FBF7F2;
   --color-blush: #F3E4DA;
   --color-soft-beige: #E9D9C7;
@@ -99,12 +113,45 @@
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
-/* Luxury Card Hover */
+/* Luxury Card Hover & 3D Lift */
 .luxury-card {
   transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .luxury-card:hover {
   transform: translateY(-8px);
+}
+
+/* Elevated Product Card & Zoom on Hover */
+.product-card-elevated {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  box-shadow: 0 4px 18px rgba(33, 26, 22, 0.06), 0 1px 3px rgba(33, 26, 22, 0.04);
+  will-change: transform, box-shadow;
+}
+.product-card-elevated:hover {
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 0 20px 38px -6px rgba(33, 26, 22, 0.16), 0 10px 18px -4px rgba(33, 26, 22, 0.08);
+}
+.product-card-elevated:hover .product-card-image {
+  transform: scale(1.10);
+}
+.product-card-image {
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Luxury Button Gradient Utility */
+.btn-luxury-gradient {
+  background: var(--btn-gradient) !important;
+  color: #FFFFFF !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 4px 14px rgba(123, 79, 38, 0.24) !important;
+}
+.btn-luxury-gradient:hover {
+  filter: brightness(1.08) !important;
+  box-shadow: 0 8px 24px -2px rgba(123, 79, 38, 0.38) !important;
+  transform: translateY(-1px);
+}
+.btn-luxury-gradient:active {
+  transform: scale(0.97);
 }
 
 /* Utiltiy classes */

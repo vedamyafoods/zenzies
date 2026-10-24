@@ -2,33 +2,53 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PremiumPreloader = ({ onComplete }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !sessionStorage.getItem('zenzies_preloaded');
+    } catch {
+      return true;
+    }
+  });
   const [counter, setCounter] = useState(0);
 
   useEffect(() => {
-    // Smooth progress counter over ~900ms
+    if (!loading) {
+      if (onComplete) onComplete();
+      return;
+    }
+
+    const finish = () => {
+      try {
+        sessionStorage.setItem('zenzies_preloaded', 'true');
+      } catch {}
+      setLoading(false);
+      if (onComplete) onComplete();
+    };
+
+    // Hard fallback safety timer (maximum 700ms)
+    const safetyTimer = setTimeout(finish, 700);
+
     const startTime = Date.now();
-    const duration = 900;
+    const duration = 500;
 
     const timer = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min((elapsed / duration) * 100, 100);
-
-      // Easing curve for luxurious acceleration & deceleration
       const easedProgress = Math.pow(progress / 100, 0.8) * 100;
       setCounter(easedProgress);
 
       if (progress >= 100) {
         clearInterval(timer);
-        setTimeout(() => {
-          setLoading(false);
-          if (onComplete) setTimeout(onComplete, 400);
-        }, 150);
+        clearTimeout(safetyTimer);
+        setTimeout(finish, 80);
       }
     }, 16);
 
-    return () => clearInterval(timer);
-  }, [onComplete]);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(safetyTimer);
+    };
+  }, [loading, onComplete]);
 
   const luxuryEase = [0.19, 1, 0.22, 1];
 

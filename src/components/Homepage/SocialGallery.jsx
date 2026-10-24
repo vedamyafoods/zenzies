@@ -50,20 +50,20 @@ const SocialGallery = () => {
       {overlayStyle && (
         <div className="absolute inset-0 pointer-events-none z-0" style={overlayStyle} />
       )}
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
+      <div className="w-full max-w-[1640px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 relative z-10">
 
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
           <div className="space-y-1 text-left">
             <span
               className="text-[11px] font-sans font-semibold tracking-[0.22em] uppercase"
-              style={{ color: design.accentColor || '#956638' }}
+              style={{ color: design.accentColor || '#956638', fontSize: design.eyebrowFontSize || undefined }}
             >
               {eyebrow}
             </span>
             <h2
               className="font-serif text-3xl sm:text-4xl lg:text-[40px] font-normal leading-tight"
-              style={{ color: design.titleColor || '#211A16' }}
+              style={{ color: design.titleColor || '#211A16', fontSize: design.titleFontSize || undefined }}
             >
               {title}
             </h2>

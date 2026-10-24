@@ -29,14 +29,19 @@ const CatalogManager = ({ type }) => {
   const [pageSize, setPageSize] = useState(10);
   const [selectedIds, setSelectedIds] = useState([]);
 
-  // Custom columns for Countries and Categories (Image and Link)
+  // Custom columns for Countries, Categories, and Collections
   const [image, setImage] = useState("");
   const [link, setLink] = useState("");
   const [order, setOrder] = useState(0);
+  const [tag, setTag] = useState("");
+  const [btnTheme, setBtnTheme] = useState("cream");
   const [comingSoon, setComingSoon] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [parentCategory, setParentCategory] = useState("");
+  const [categoriesList, setCategoriesList] = useState([]);
 
-  const hasExtraFields = type === "Countries" || type === "Categories";
+  const hasExtraFields = type === "Countries" || type === "Categories" || type === "Collections";
+  const isSubCategories = type === "SubCategories";
 
   const toRows = (snapshot, isTrash = false) => snapshot.docs.map((item) => ({
     id: item.id,
@@ -51,6 +56,15 @@ const CatalogManager = ({ type }) => {
     return () => { stopSource(); stopTrash(); };
   }, [collectionName]);
 
+  useEffect(() => {
+    if (isSubCategories) {
+      const stopCat = onSnapshot(collection(db, "categories"), (snapshot) => {
+        setCategoriesList(snapshot.docs.map((d) => ({ id: d.id, name: d.data().name })).filter((c) => c.name));
+      });
+      return () => stopCat();
+    }
+  }, [isSubCategories]);
+
   const items = useMemo(() => [...sourceItems, ...trashItems], [sourceItems, trashItems]);
 
   const reset = () => {
@@ -61,7 +75,10 @@ const CatalogManager = ({ type }) => {
     setImage("");
     setLink("");
     setOrder(0);
+    setTag("");
+    setBtnTheme("cream");
     setComingSoon(false);
+    setParentCategory("");
     setError("");
   };
 
@@ -112,6 +129,14 @@ const CatalogManager = ({ type }) => {
         data.image = image;
         data.link = link.trim();
         data.order = Number(order) || 0;
+        if (type === "Categories") {
+          data.tag = tag.trim();
+          data.btnTheme = btnTheme;
+        }
+      }
+
+      if (isSubCategories) {
+        data.parentCategory = parentCategory.trim();
       }
 
       if (type === "Countries") {
@@ -141,6 +166,13 @@ const CatalogManager = ({ type }) => {
       setImage(item.image || "");
       setLink(item.link || "");
       setOrder(item.order !== undefined ? item.order : (item.displayOrder || 0));
+      if (type === "Categories") {
+        setTag(item.tag || "");
+        setBtnTheme(item.btnTheme || "cream");
+      }
+    }
+    if (isSubCategories) {
+      setParentCategory(item.parentCategory || item.category || "");
     }
     if (type === "Countries") {
       setComingSoon(Boolean(item.comingSoon));
@@ -149,8 +181,35 @@ const CatalogManager = ({ type }) => {
     editor.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
+  const checkCategoryRelationships = async (categoryName) => {
+    try {
+      const [subSnap, prodSnap] = await Promise.all([
+        getDocs(query(collection(db, "subcategories"), where("parentCategory", "==", categoryName))),
+        getDocs(query(collection(db, "products"), where("category", "==", categoryName))),
+      ]);
+      return {
+        subCount: subSnap.size,
+        prodCount: prodSnap.size,
+      };
+    } catch (e) {
+      return { subCount: 0, prodCount: 0 };
+    }
+  };
+
   const moveToTrash = async (item) => {
-    if (!window.confirm(`Move ${item.name} to Trash?`)) return;
+    if (type === "Categories") {
+      const { subCount, prodCount } = await checkCategoryRelationships(item.name);
+      if (subCount > 0 || prodCount > 0) {
+        const proceed = window.confirm(
+          `⚠️ WARNING: Category "${item.name}" is referenced by ${subCount} subcategories and ${prodCount} products.\n\nMoving this category to Trash may affect linked items in the store.\n\nDo you want to proceed?`
+        );
+        if (!proceed) return;
+      } else {
+        if (!window.confirm(`Move ${item.name} to Trash?`)) return;
+      }
+    } else {
+      if (!window.confirm(`Move ${item.name} to Trash?`)) return;
+    }
     try {
       const { id, trashId, ...data } = item;
       const batch = writeBatch(db);
@@ -165,7 +224,19 @@ const CatalogManager = ({ type }) => {
   };
 
   const permanentDelete = async (item) => {
-    if (!window.confirm(`Permanently delete ${item.name}? This cannot be undone.`)) return;
+    if (type === "Categories") {
+      const { subCount, prodCount } = await checkCategoryRelationships(item.name);
+      if (subCount > 0 || prodCount > 0) {
+        const proceed = window.confirm(
+          `⚠️ WARNING: Category "${item.name}" is referenced by ${subCount} subcategories and ${prodCount} products.\n\nPermanently deleting this will leave those items without a parent category.\n\nAre you sure you want to permanently delete?`
+        );
+        if (!proceed) return;
+      } else {
+        if (!window.confirm(`Permanently delete ${item.name}? This cannot be undone.`)) return;
+      }
+    } else {
+      if (!window.confirm(`Permanently delete ${item.name}? This cannot be undone.`)) return;
+    }
     try {
       await deleteDoc(doc(db, "trash", item.trashId));
     } catch (event) {
@@ -388,8 +459,9 @@ const CatalogManager = ({ type }) => {
                 </th>
                 {hasExtraFields && <th className="px-6 py-3">Image</th>}
                 <th className="px-6 py-3">Name</th>
+                {isSubCategories && <th className="px-5 py-3">Parent Category</th>}
                 <th className="px-5 py-3">Description</th>
-                {hasExtraFields && <th className="px-5 py-3">Link</th>}
+                {hasExtraFields && <th className="px-5 py-3">{type === "Collections" ? "Order" : "Link"}</th>}
                 <th className="px-5 py-3">Status</th>
                 <th className="px-6 py-3 text-right">Actions</th>
               </tr>
@@ -429,8 +501,19 @@ const CatalogManager = ({ type }) => {
                         )}
                       </div>
                     </td>
+                    {isSubCategories && (
+                      <td className="px-5 py-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-[#941232] border border-rose-100">
+                          {item.parentCategory || item.category || "General"}
+                        </span>
+                      </td>
+                    )}
                     <td className="px-5 py-4 text-slate-500">{item.description || " "}</td>
-                    {hasExtraFields && <td className="px-5 py-4 text-slate-500 font-mono truncate max-w-[150px]">{item.link || " "}</td>}
+                    {hasExtraFields && (
+                      <td className="px-5 py-4 text-slate-500 font-mono truncate max-w-[150px]">
+                        {type === "Collections" ? (item.order !== undefined ? item.order : 0) : (item.link || " ")}
+                      </td>
+                    )}
                     <td className="px-5 py-4">
                       <span className={`rounded-full px-2.5 py-1 text-[16px] font-semibold ${tone(item.status)}`}>{item.status}</span>
                     </td>
@@ -445,7 +528,7 @@ const CatalogManager = ({ type }) => {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={hasExtraFields ? 7 : 5} className="px-6 py-14 text-center text-base text-slate-400">No entries found.</td>
+                  <td colSpan={hasExtraFields ? 8 : isSubCategories ? 6 : 5} className="px-6 py-14 text-center text-base text-slate-400">No entries found.</td>
                 </tr>
               )}
             </tbody>
@@ -504,6 +587,24 @@ const CatalogManager = ({ type }) => {
             Description
             <input value={description} onChange={(event) => setDescription(event.target.value)} className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white text-base px-3 py-2.5 outline-none" />
           </label>
+
+          {isSubCategories && (
+            <label className="text-[16px] font-semibold">
+              Parent Category *
+              <select
+                value={parentCategory}
+                onChange={(event) => setParentCategory(event.target.value)}
+                className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white text-base px-3 py-2.5 outline-none"
+              >
+                <option value="">-- Select Parent Category --</option>
+                {categoriesList.map((cat) => (
+                  <option key={cat.id} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
           {hasExtraFields && (
             <>
@@ -605,6 +706,33 @@ const CatalogManager = ({ type }) => {
                   placeholder="1, 2, 3..."
                 />
               </label>
+
+              {type === "Categories" && (
+                <>
+                  <label className="text-[16px] font-semibold">
+                    Sub-Tag / Designs Count
+                    <input
+                      value={tag}
+                      onChange={(event) => setTag(event.target.value)}
+                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white text-base px-3 py-2.5 outline-none"
+                      placeholder="e.g. 50+ DESIGNS, 30+ OPTIONS"
+                    />
+                  </label>
+
+                  <label className="text-[16px] font-semibold">
+                    Card Arrow Button Theme
+                    <select
+                      value={btnTheme}
+                      onChange={(event) => setBtnTheme(event.target.value)}
+                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white text-base px-3 py-2.5 outline-none"
+                    >
+                      <option value="cream">Cream (Light Beige)</option>
+                      <option value="rose">Rose Accent (Pink)</option>
+                      <option value="gradient">Global Button Gradient</option>
+                    </select>
+                  </label>
+                </>
+              )}
             </>
           )}
 
