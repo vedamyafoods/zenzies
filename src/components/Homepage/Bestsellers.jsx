@@ -349,7 +349,7 @@ const BestSellers = () => {
                     <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between items-center text-center space-y-2">
                       <div className="w-full flex flex-col items-center">
                         {/* Title */}
-                        <h3 className="text-xs sm:text-[13.5px] font-sans font-medium text-[#211A16] group-hover:text-[#956638] transition-colors truncate w-full text-center">
+                        <h3 className="text-sm sm:text-base font-serif font-normal text-[#211A16] group-hover:text-[#956638] transition-colors truncate w-full text-center leading-snug">
                           {product.name}
                         </h3>
 
@@ -359,25 +359,25 @@ const BestSellers = () => {
                             {[...Array(5)].map((_, i) => (
                               <Star
                                 key={i}
-                                size={12}
+                                size={13}
                                 fill={i < Math.floor(ratingVal) ? 'currentColor' : 'none'}
                                 stroke="currentColor"
                                 className="shrink-0"
                               />
                             ))}
                           </div>
-                          <span className="text-[11px] font-sans text-[#6B5E52]">
+                          <span className="text-xs font-sans text-[#6B5E52]">
                             ({reviewsCount})
                           </span>
                         </div>
 
                         {/* Price & Strikethrough Original Price */}
                         <div className="flex items-baseline justify-center gap-2 mt-1.5">
-                          <span className="text-sm sm:text-base font-sans font-bold text-[#211A16]">
+                          <span className="text-base sm:text-lg font-serif font-medium text-[#211A16]">
                             ₹{price.toLocaleString()}
                           </span>
                           {originalPrice > price && (
-                            <span className="text-xs font-sans text-[#8A7D70] line-through">
+                            <span className="text-xs sm:text-sm font-sans text-[#9E9082] line-through">
                               ₹{originalPrice.toLocaleString()}
                             </span>
                           )}
@@ -389,7 +389,7 @@ const BestSellers = () => {
                         type="button"
                         onClick={(e) => handleAddToCart(e, product)}
                         disabled={isSoldOut || isCartLoading}
-                        className={`w-full py-2.5 sm:py-3 px-3 rounded-[6px] text-xs font-sans font-semibold tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer mt-1 active:scale-95 shadow-sm hover:brightness-105 hover:shadow-md ${
+                        className={`w-full py-2.5 sm:py-3 px-3 min-h-[42px] rounded-[8px] text-xs font-sans font-semibold tracking-wider uppercase transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer mt-1 active:scale-95 shadow-sm hover:brightness-105 hover:shadow-md ${
                           isSoldOut
                             ? 'bg-[#E8DDD2] text-[#6B5E52] cursor-not-allowed'
                             : 'text-white'

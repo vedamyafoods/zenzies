@@ -74,6 +74,10 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
   const [heroData, setHeroData] = useState({
     videoURL: "/img/video1.mp4",
     posterURL: "/img/zenzies/hero_banner_lifestyle.png",
+    heroHeight: "650px",
+    overlayType: "none", // 'none' (Pristine clean image) | 'left_gradient' | 'dark' | 'light' | 'custom'
+    overlayOpacity: 0,
+    overlayColor: "#000000",
     eyebrow: "JEWELLERY & EVERYDAY ORGANIZATION",
     line1: "Little Boxes.",
     line2: "Beautiful Things.",
@@ -83,6 +87,10 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
     btn1Link: "/shop",
     btn2Text: "Explore Jewellery Boxes",
     btn2Link: "/shop?category=Jewellery+Boxes",
+    eyebrowFontSize: "",
+    titleFontSize: "",
+    subtitleFontSize: "",
+    badgeFontSize: "",
     benefits: DEFAULT_HERO_BENEFITS,
   });
   const [savingHero, setSavingHero] = useState(false);
@@ -152,16 +160,24 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
         setHeroData({
           videoURL: d.videoURL || "",
           posterURL: d.posterURL || "/img/zenzies/hero_banner_lifestyle.png",
+          heroHeight: d.heroHeight || "650px",
+          overlayType: d.overlayType || "none",
+          overlayOpacity: d.overlayOpacity !== undefined ? Number(d.overlayOpacity) : 0,
+          overlayColor: d.overlayColor || "#000000",
           eyebrow: d.eyebrow !== undefined ? d.eyebrow : "JEWELLERY & EVERYDAY ORGANIZATION",
-          line1: l1 || "Little Boxes.",
-          line2: l2 || "Beautiful Things.",
+          line1: l1 !== undefined ? l1 : "Little Boxes.",
+          line2: l2 !== undefined ? l2 : "Beautiful Things.",
           title: d.title || `${l1 || "Little Boxes."}\n${l2 || "Beautiful Things."}`,
-          subtitle: d.subtitle || "Discover beautiful jewellery and practical organizer boxes designed for your everyday moments.",
+          subtitle: d.subtitle !== undefined ? d.subtitle : "Discover beautiful jewellery and practical organizer boxes designed for your everyday moments.",
           btn1Text: d.btn1Text || "Shop Jewellery",
           btn1Link: d.btn1Link || "/shop",
           btn2Text: d.btn2Text || "Explore Jewellery Boxes",
           btn2Link: d.btn2Link || "/shop?category=Jewellery+Boxes",
-          benefits: Array.isArray(d.benefits) && d.benefits.length > 0 ? d.benefits : DEFAULT_HERO_BENEFITS,
+          eyebrowFontSize: d.eyebrowFontSize || "",
+          titleFontSize: d.titleFontSize || "",
+          subtitleFontSize: d.subtitleFontSize || "",
+          badgeFontSize: d.badgeFontSize || "",
+          benefits: Array.isArray(d.benefits) ? d.benefits : DEFAULT_HERO_BENEFITS,
         });
       }
     });
@@ -260,6 +276,11 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
     try {
       const payload = {
         ...heroData,
+        heroHeight: heroData.heroHeight || "650px",
+        overlayType: heroData.overlayType || "none",
+        overlayOpacity: heroData.overlayOpacity !== undefined ? Number(heroData.overlayOpacity) : 0,
+        overlayColor: heroData.overlayColor || "#000000",
+        benefits: Array.isArray(heroData.benefits) ? heroData.benefits : [],
         title: `${heroData.line1 || ""}\n${heroData.line2 || ""}`.trim(),
         updatedAt: new Date().toISOString()
       };
@@ -269,6 +290,10 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
       await setDoc(doc(db, "site_settings", "section_designs"), {
         hero: {
           backgroundImage: heroData.posterURL || "",
+          heroHeight: heroData.heroHeight || "650px",
+          overlayType: heroData.overlayType || "none",
+          overlayOpacity: Number(heroData.overlayOpacity || 0) / 100,
+          overlayColor: heroData.overlayColor || "#000000",
           eyebrow: heroData.eyebrow,
           line1: heroData.line1,
           line2: heroData.line2,
@@ -281,6 +306,7 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
           titleFontSize: heroData.titleFontSize || "",
           subtitleFontSize: heroData.subtitleFontSize || "",
           badgeFontSize: heroData.badgeFontSize || "",
+          benefits: Array.isArray(heroData.benefits) ? heroData.benefits : [],
         }
       }, { merge: true });
 
@@ -297,22 +323,47 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
 
   // ─── Hero Benefits CRUD ────────────────────────────────────────────────────
   const handleAddHeroBenefit = () => {
-    const list = heroData.benefits || [];
     const newB = { id: 'b-' + Date.now(), icon: 'gem', text: 'New Feature' };
-    setHeroData({ ...heroData, benefits: [...list, newB] });
+    setHeroData((prev) => ({
+      ...prev,
+      benefits: [...(prev.benefits || []), newB]
+    }));
   };
 
   const handleUpdateHeroBenefit = (idx, field, value) => {
-    const list = [...(heroData.benefits || [])];
-    if (list[idx]) {
-      list[idx] = { ...list[idx], [field]: value };
-      setHeroData({ ...heroData, benefits: list });
-    }
+    setHeroData((prev) => {
+      const list = [...(prev.benefits || [])];
+      if (list[idx]) {
+        list[idx] = { ...list[idx], [field]: value };
+      }
+      return { ...prev, benefits: list };
+    });
   };
 
   const handleDeleteHeroBenefit = (idx) => {
-    const list = (heroData.benefits || []).filter((_, i) => i !== idx);
-    setHeroData({ ...heroData, benefits: list });
+    setHeroData((prev) => {
+      const current = Array.isArray(prev.benefits) ? prev.benefits : [];
+      const updated = current.filter((_, i) => i !== idx);
+      return { ...prev, benefits: updated };
+    });
+  };
+
+  const handleMoveHeroBenefit = (idx, direction) => {
+    setHeroData((prev) => {
+      const list = [...(prev.benefits || [])];
+      const target = idx + direction;
+      if (target < 0 || target >= list.length) return prev;
+      const temp = list[idx];
+      list[idx] = list[target];
+      list[target] = temp;
+      return { ...prev, benefits: list };
+    });
+  };
+
+  const handleClearAllHeroBenefits = () => {
+    if (window.confirm("Are you sure you want to remove all hero benefit badges?")) {
+      setHeroData((prev) => ({ ...prev, benefits: [] }));
+    }
   };
 
   // ─── Announcements CRUD ────────────────────────────────────────────────────
@@ -941,6 +992,127 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                 </div>
               </div>
 
+              {/* Hero Banner Height Settings */}
+              <div className={`p-4 rounded-xl border space-y-2.5 ${isDarkMode ? "bg-slate-900/40 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Hero Banner Height
+                  </label>
+                  <span className="text-[11px] text-slate-400 font-mono">Current: {heroData.heroHeight || "650px"}</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Controls the minimum height of the hero banner on desktop and tablets. You can pick a preset or type any custom value (e.g. 700px, 100vh, 80vh).
+                </p>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    value={heroData.heroHeight || ""}
+                    onChange={(e) => setHeroData(prev => ({ ...prev, heroHeight: e.target.value }))}
+                    className={inp}
+                    placeholder="e.g. 650px, 700px, 100vh, 80vh, auto"
+                  />
+                </div>
+                {/* Quick Preset Buttons */}
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {[
+                    { label: "Compact (500px)", val: "500px" },
+                    { label: "Standard (620px)", val: "620px" },
+                    { label: "Spacious (700px)", val: "700px" },
+                    { label: "Cinematic (800px)", val: "800px" },
+                    { label: "Full Screen (100vh)", val: "100vh" },
+                    { label: "Auto Fit", val: "auto" },
+                  ].map((preset) => (
+                    <button
+                      key={preset.val}
+                      type="button"
+                      onClick={() => setHeroData(prev => ({ ...prev, heroHeight: preset.val }))}
+                      className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                        (heroData.heroHeight || "650px") === preset.val
+                          ? "bg-[#941232] text-white border-[#941232] shadow-xs"
+                          : isDarkMode
+                            ? "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Background Image Overlay & Opacity Settings */}
+              <div className={`p-4 rounded-xl border space-y-3 ${isDarkMode ? "bg-slate-900/40 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Background Overlay & Opacity
+                  </label>
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                    heroData.overlayType === "none" || !heroData.overlayType || heroData.overlayOpacity === 0
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  }`}>
+                    {heroData.overlayType === "none" || !heroData.overlayType || heroData.overlayOpacity === 0
+                      ? "✓ Clean / Pristine (0% Overlay)"
+                      : `${heroData.overlayOpacity || 0}% Opacity (${heroData.overlayType})`}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Default is <strong>None (Pristine)</strong> so your background image appears exactly as uploaded without any unwanted wash or dimming. Choose an overlay only if you wish to add contrast over your image.
+                </p>
+
+                {/* Overlay Mode Selector */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { id: "none", label: "None (Pristine)", desc: "Exact image, 0% overlay" },
+                    { id: "left_gradient", label: "Left Gradient", desc: "Text contrast on left" },
+                    { id: "dark", label: "Dark Tint", desc: "Subtle dark overlay" },
+                    { id: "light", label: "Light Tint", desc: "Warm cream overlay" },
+                  ].map((mode) => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setHeroData(prev => ({
+                        ...prev,
+                        overlayType: mode.id,
+                        overlayOpacity: mode.id === "none" ? 0 : (prev.overlayOpacity && prev.overlayOpacity > 0 ? prev.overlayOpacity : 35)
+                      }))}
+                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                        (heroData.overlayType || "none") === mode.id
+                          ? "bg-[#941232]/10 border-[#941232] text-[#941232] dark:text-rose-400 font-bold shadow-xs"
+                          : isDarkMode
+                            ? "bg-slate-800/60 border-slate-700 text-slate-300 hover:bg-slate-800"
+                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      <div className="text-xs">{mode.label}</div>
+                      <div className="text-[10px] opacity-70 font-normal">{mode.desc}</div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Opacity Slider (Only shown if overlayType is not 'none') */}
+                {heroData.overlayType && heroData.overlayType !== "none" && (
+                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-semibold">
+                      <span className="text-slate-500">Overlay Opacity:</span>
+                      <span className="font-mono text-[#941232] dark:text-rose-400">{heroData.overlayOpacity || 0}%</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="5"
+                        value={heroData.overlayOpacity !== undefined ? heroData.overlayOpacity : 35}
+                        onChange={(e) => setHeroData(prev => ({ ...prev, overlayOpacity: Number(e.target.value) }))}
+                        className="w-full accent-[#941232] cursor-pointer"
+                      />
+                      <span className="text-xs font-mono w-10 text-right">{heroData.overlayOpacity || 0}%</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Eyebrow */}
               <div>
                 <label className={labelStyle}>Eyebrow Subtitle</label>
@@ -1085,62 +1257,139 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
               {/* Hero Bottom Benefit Badges (CRUD) */}
               <div className="pt-2">
                 <div className="flex justify-between items-center mb-2">
-                  <label className={labelStyle}>Hero Bottom Benefit Badges (CRUD)</label>
-                  <button
-                    type="button"
-                    onClick={handleAddHeroBenefit}
-                    className="text-xs font-bold text-[#941232] hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <Plus size={13} /> Add Benefit
-                  </button>
-                </div>
-                <div className="space-y-2">
-                  {(heroData.benefits || []).map((b, idx) => {
-                    const IconComp = getIconComponent(b.icon);
-                    return (
-                      <div
-                        key={b.id || idx}
-                        className={`flex items-center gap-2 p-2 rounded-xl border ${
-                          isDarkMode ? "bg-slate-950 border-slate-800" : "bg-slate-50 border-slate-200"
-                        }`}
+                  <div>
+                    <label className={labelStyle}>Hero Bottom Benefit Badges (CRUD)</label>
+                    <span className="text-[11px] text-slate-400">Badges displayed directly below hero CTAs</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {(heroData.benefits || []).length > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleClearAllHeroBenefits}
+                        className="text-xs font-semibold text-rose-500 hover:text-rose-600 hover:underline cursor-pointer"
+                        title="Delete all badges"
                       >
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIconPickerTarget({ type: 'hero_benefit', index: idx });
-                            setIconPickerOpen(true);
-                          }}
-                          className="p-2 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 cursor-pointer shrink-0"
-                          title="Change icon"
-                        >
-                          <IconComp size={18} />
-                        </button>
-                        <input
-                          type="text"
-                          value={b.text}
-                          onChange={(e) => handleUpdateHeroBenefit(idx, 'text', e.target.value)}
-                          className={`${inp} py-1.5`}
-                          placeholder="e.g. Trendy Designs"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteHeroBenefit(idx)}
-                          className="p-2 text-rose-500 hover:text-rose-600 cursor-pointer shrink-0"
-                          title="Delete badge"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    );
-                  })}
+                        Clear All
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleAddHeroBenefit}
+                      className="text-xs font-bold text-[#941232] hover:text-[#b01540] hover:underline flex items-center gap-1 cursor-pointer bg-[#941232]/10 dark:bg-[#941232]/20 px-2.5 py-1 rounded-lg"
+                    >
+                      <Plus size={13} /> Add Benefit
+                    </button>
+                  </div>
                 </div>
+
+                {(!heroData.benefits || heroData.benefits.length === 0) ? (
+                  <div className="p-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-800 text-center text-xs text-slate-400 space-y-1">
+                    <p>No benefit badges currently added. (Bottom strip is hidden on homepage)</p>
+                    <button
+                      type="button"
+                      onClick={handleAddHeroBenefit}
+                      className="text-xs font-bold text-[#941232] hover:underline cursor-pointer inline-flex items-center gap-1 mt-1"
+                    >
+                      <Plus size={12} /> Add First Badge
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {(heroData.benefits || []).map((b, idx) => {
+                      const IconComp = getIconComponent(b.icon);
+                      return (
+                        <div
+                          key={b.id || `b-${idx}`}
+                          className={`flex items-center gap-2 p-2 rounded-xl border transition-all ${
+                            isDarkMode ? "bg-slate-950 border-slate-800" : "bg-slate-50 border-slate-200"
+                          }`}
+                        >
+                          {/* Reorder Arrows */}
+                          <div className="flex flex-col gap-0.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleMoveHeroBenefit(idx, -1)}
+                              disabled={idx === 0}
+                              className="p-1 rounded text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              title="Move up"
+                            >
+                              <ChevronUp size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveHeroBenefit(idx, 1)}
+                              disabled={idx === (heroData.benefits || []).length - 1}
+                              className="p-1 rounded text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              title="Move down"
+                            >
+                              <ChevronDown size={13} />
+                            </button>
+                          </div>
+
+                          {/* Icon Selector Button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIconPickerTarget({ type: 'hero_benefit', index: idx });
+                              setIconPickerOpen(true);
+                            }}
+                            className="p-2 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 cursor-pointer shrink-0"
+                            title="Change icon"
+                          >
+                            <IconComp size={18} />
+                          </button>
+
+                          {/* Text input */}
+                          <input
+                            type="text"
+                            value={b.text || ""}
+                            onChange={(e) => handleUpdateHeroBenefit(idx, 'text', e.target.value)}
+                            className={`${inp} py-1.5`}
+                            placeholder="e.g. Trendy Designs"
+                          />
+
+                          {/* Delete Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleDeleteHeroBenefit(idx);
+                            }}
+                            className="p-2 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
+                            title="Delete badge"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Right Column: Live Video & Background Preview */}
             <div className="lg:col-span-5 space-y-4">
-              <label className={labelStyle}>Live Visual Preview</label>
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-black/90 border border-slate-200 dark:border-slate-800 shadow-inner flex flex-col justify-end p-5 text-white">
+              <div className="flex items-center justify-between">
+                <label className={labelStyle}>Live Visual Preview</label>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">
+                    H: {heroData.heroHeight || "650px"}
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">
+                    {heroData.overlayType === "none" || !heroData.overlayType || heroData.overlayOpacity === 0 ? "Overlay: 0% (Clean)" : `Overlay: ${heroData.overlayOpacity || 0}%`}
+                  </span>
+                </div>
+              </div>
+
+              <div
+                className="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-inner flex flex-col justify-end p-5 text-white transition-all"
+                style={{
+                  minHeight: heroData.heroHeight === "100vh" ? "420px" : (heroData.heroHeight ? `clamp(280px, 35vw, ${heroData.heroHeight})` : "320px"),
+                  aspectRatio: (!heroData.heroHeight || heroData.heroHeight === "auto") ? "4/3" : undefined,
+                }}
+              >
                 {heroData.videoURL ? (
                   <video
                     key={heroData.videoURL}
@@ -1165,29 +1414,76 @@ const SiteSettingsManager = ({ isDarkMode = false }) => {
                   </div>
                 )}
 
-                {/* Gradient overlay for text legibility in preview */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-[1]" />
+                {/* Dynamic Preview Overlay matching settings */}
+                {heroData.overlayType === "left_gradient" && heroData.overlayOpacity > 0 && (
+                  <div
+                    className="absolute inset-0 z-[1] pointer-events-none"
+                    style={{
+                      background: "linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 45%, transparent 100%)",
+                      opacity: (heroData.overlayOpacity !== undefined ? heroData.overlayOpacity : 50) / 100,
+                    }}
+                  />
+                )}
+                {heroData.overlayType === "dark" && heroData.overlayOpacity > 0 && (
+                  <div
+                    className="absolute inset-0 z-[1] pointer-events-none bg-black"
+                    style={{ opacity: (heroData.overlayOpacity !== undefined ? heroData.overlayOpacity : 40) / 100 }}
+                  />
+                )}
+                {heroData.overlayType === "light" && heroData.overlayOpacity > 0 && (
+                  <div
+                    className="absolute inset-0 z-[1] pointer-events-none bg-[#FAF6F0]"
+                    style={{ opacity: (heroData.overlayOpacity !== undefined ? heroData.overlayOpacity : 40) / 100 }}
+                  />
+                )}
+                {heroData.overlayType === "custom" && heroData.overlayOpacity > 0 && (
+                  <div
+                    className="absolute inset-0 z-[1] pointer-events-none"
+                    style={{
+                      backgroundColor: heroData.overlayColor || "#000000",
+                      opacity: (heroData.overlayOpacity !== undefined ? heroData.overlayOpacity : 40) / 100,
+                    }}
+                  />
+                )}
+                {/* When overlayType is 'none' or opacity is 0: Clean image with zero overlay! */}
 
                 {/* Content preview */}
                 <div className="relative z-[2] space-y-1">
-                  <span className="text-[10px] tracking-widest uppercase font-semibold text-amber-300 block">
+                  <span
+                    className="text-[10px] tracking-widest uppercase font-semibold text-amber-300 block drop-shadow-sm"
+                    style={{ fontSize: heroData.eyebrowFontSize || undefined }}
+                  >
                     {heroData.eyebrow}
                   </span>
-                  <div className="font-serif text-lg leading-tight font-medium">
+                  <div className="font-serif text-lg leading-tight font-medium drop-shadow-sm">
                     <span className="block text-white">{heroData.line1}</span>
                     <span className="block text-amber-400">{heroData.line2}</span>
                   </div>
-                  <p className="text-[11px] text-white/80 line-clamp-2 leading-relaxed">
+                  <p
+                    className="text-[11px] text-white/90 line-clamp-2 leading-relaxed drop-shadow-sm"
+                    style={{ fontSize: heroData.subtitleFontSize || undefined }}
+                  >
                     {heroData.subtitle}
                   </p>
                   <div className="flex gap-2 pt-2">
-                    <span className="px-2.5 py-1 rounded bg-[#B8752A] text-white text-[10px] font-semibold">
+                    <span className="px-2.5 py-1 rounded bg-[#B8752A] text-white text-[10px] font-semibold shadow-xs">
                       {heroData.btn1Text}
                     </span>
-                    <span className="px-2.5 py-1 rounded border border-amber-300 text-amber-200 text-[10px] font-semibold">
+                    <span className="px-2.5 py-1 rounded border border-amber-300 text-amber-200 text-[10px] font-semibold backdrop-blur-xs">
                       {heroData.btn2Text}
                     </span>
                   </div>
+
+                  {/* Benefit badges preview */}
+                  {(heroData.benefits || []).length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-white/20 mt-2">
+                      {(heroData.benefits || []).map((b, i) => (
+                        <span key={b.id || i} className="text-[9px] text-amber-200/90 flex items-center gap-1 drop-shadow-xs">
+                          ✦ {b.text}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

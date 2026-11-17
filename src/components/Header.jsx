@@ -175,7 +175,7 @@ const LuxuryHeader = () => {
               <Link
                 key={link.name}
                 to={link.href}
-                className="relative py-2 text-[13px] font-medium text-[#211A16] hover:text-[#956638] tracking-[0.05em] transition-colors duration-200 group"
+                className="relative py-2 text-sm font-medium font-body text-[#211A16] hover:text-[#956638] tracking-[0.04em] transition-colors duration-200 group"
               >
                 {link.name}
                 <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#956638] scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-center" />

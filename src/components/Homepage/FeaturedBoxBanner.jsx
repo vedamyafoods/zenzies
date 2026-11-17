@@ -117,7 +117,7 @@ const FeaturedBoxBanner = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.55, delay: 0.1 }}
-            className="text-xs sm:text-[13.5px] lg:text-[14px] font-sans leading-[1.55] max-w-[360px] sm:max-w-[420px] mt-3.5 sm:mt-4 mb-4 sm:mb-5"
+            className="text-sm sm:text-base font-body leading-relaxed max-w-[380px] sm:max-w-[460px] mt-3.5 sm:mt-4 mb-4 sm:mb-5"
             style={{ color: design.subtitleColor || design.textColor || '#62564B', fontSize: design.subtitleFontSize || undefined }}
           >
             {subtitle}
@@ -144,7 +144,7 @@ const FeaturedBoxBanner = () => {
                     <Check size={11} strokeWidth={2.8} />
                   </span>
                   <span
-                    className="text-[12px] sm:text-[13px] font-sans font-medium leading-tight"
+                    className="text-xs sm:text-sm font-body font-medium leading-tight"
                     style={{ color: design.textColor || '#62564B', fontSize: design.featuresFontSize || undefined }}
                   >
                     {feature.text}
@@ -164,7 +164,7 @@ const FeaturedBoxBanner = () => {
             >
               <Link
                 to={btnLink}
-                className="inline-flex items-center gap-2 h-[44px] sm:h-[48px] px-6 sm:px-7 rounded-[6px] text-white text-xs sm:text-[13.5px] font-sans font-semibold tracking-wide transition-all duration-200 shadow-md hover:shadow-lg hover:brightness-105 active:scale-95 group"
+                className="inline-flex items-center gap-2 h-[46px] sm:h-[48px] px-6 sm:px-7 rounded-[8px] text-white text-xs sm:text-sm font-body font-semibold tracking-wider uppercase transition-all duration-200 shadow-md hover:shadow-lg hover:brightness-105 active:scale-95 group"
                 style={{
                   background: design.btnGradient || btnGradient,
                   color: design.btnTextColor || '#FFFFFF'

@@ -69,24 +69,24 @@ const Footer = () => {
               </div>
             </Link>
 
-            <p className="text-xs sm:text-sm text-[#6B5E52] font-sans leading-relaxed max-w-sm">
+            <p className="text-sm text-[#6B5E52] font-body leading-relaxed max-w-sm">
               Timeless jewellery for a more beautiful you. Practical organizer boxes and everyday jewellery crafted to protect every treasured sparkle.
             </p>
 
             {/* Contact Details */}
-            <div className="pt-2 space-y-1.5 text-xs sm:text-sm text-[#211A16]">
+            <div className="pt-2 space-y-2 text-sm text-[#211A16] font-body">
               <a
                 href="tel:+919977712653"
                 className="flex items-center gap-2 text-[#6B5E52] hover:text-[#956638] transition-colors"
               >
-                <Phone size={14} className="text-[#956638]" />
+                <Phone size={15} className="text-[#956638]" />
                 <span>+91 9977712653</span>
               </a>
               <a
                 href="mailto:support@zenzies.in"
                 className="flex items-center gap-2 text-[#6B5E52] hover:text-[#956638] transition-colors"
               >
-                <Mail size={14} className="text-[#956638]" />
+                <Mail size={15} className="text-[#956638]" />
                 <span>support@zenzies.in</span>
               </a>
             </div>
@@ -106,11 +106,11 @@ const Footer = () => {
           </div>
 
           {/* Column 2: Shop Links (Span 3) */}
-          <div className="lg:col-span-3 space-y-3.5 text-left">
-            <h4 className="text-xs sm:text-[13px] font-sans font-bold uppercase tracking-[0.18em] text-[#211A16]">
-              Shop
+          <div className="lg:col-span-3 space-y-4 text-left">
+            <h4 className="text-xs font-body font-bold uppercase tracking-[0.2em] text-[#211A16]">
+              Shop Collections
             </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm">
+            <ul className="space-y-2.5 text-sm font-body">
               {shopLinks.map((link) => (
                 <li key={link.name}>
                   <Link
@@ -125,11 +125,11 @@ const Footer = () => {
           </div>
 
           {/* Column 3: About Links (Span 2) */}
-          <div className="lg:col-span-2 space-y-3.5 text-left">
-            <h4 className="text-xs sm:text-[13px] font-sans font-bold uppercase tracking-[0.18em] text-[#211A16]">
-              About
+          <div className="lg:col-span-2 space-y-4 text-left">
+            <h4 className="text-xs font-body font-bold uppercase tracking-[0.2em] text-[#211A16]">
+              The Brand
             </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm">
+            <ul className="space-y-2.5 text-sm font-body">
               {aboutLinks.map((link) => (
                 <li key={link.name}>
                   <Link
@@ -144,11 +144,11 @@ const Footer = () => {
           </div>
 
           {/* Column 4: Customer Care (Span 3) */}
-          <div className="lg:col-span-3 space-y-3.5 text-left">
-            <h4 className="text-xs sm:text-[13px] font-sans font-bold uppercase tracking-[0.18em] text-[#211A16]">
-              Customer Care
+          <div className="lg:col-span-3 space-y-4 text-left">
+            <h4 className="text-xs font-body font-bold uppercase tracking-[0.2em] text-[#211A16]">
+              Concierge Care
             </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm">
+            <ul className="space-y-2.5 text-sm font-body">
               {customerLinks.map((link) => (
                 <li key={link.name}>
                   <Link

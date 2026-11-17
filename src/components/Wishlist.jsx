@@ -10,20 +10,12 @@ import {
   ArrowLeft,
   Loader2,
   Sparkles,
-  ShieldCheck,
-  Truck,
-  Gift,
   ArrowRight,
-  Lock,
   Gem,
-  CheckCircle2,
-  Filter,
-  Check,
   Bell
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "../hooks/useStore";
-import Breadcrumb from "./Breadcrumb";
 import { getOptimizedImageUrl, handleImageError } from "../config/cloudinary";
 import NotifyMeModal from "./NotifyMeModal";
 
@@ -98,20 +90,14 @@ const Wishlist = () => {
 
   const moveToCart = async (item) => {
     if (!user) return;
-    if (isItemOutOfStock(item)) {
-      setNotifyProduct(item);
-      return;
-    }
-    setMovingItems(prev => ({ ...prev, [item.id]: true }));
+    setMovingItems((prev) => ({ ...prev, [item.id]: true }));
     try {
-      const success = await addToCart(item);
-      if (success) {
+      const added = await addToCart(item, 1);
+      if (added) {
         await removeItem(item.id);
       }
-    } catch (error) {
-      console.error("Error moving to cart:", error);
     } finally {
-      setMovingItems(prev => ({ ...prev, [item.id]: false }));
+      setMovingItems((prev) => ({ ...prev, [item.id]: false }));
     }
   };
 
@@ -119,33 +105,24 @@ const Wishlist = () => {
     if (!user || items.length === 0) return;
     setMovingAll(true);
     try {
-      const inStockItems = items.filter(item => !isItemOutOfStock(item));
-      for (const item of inStockItems) {
-        const success = await addToCart(item);
-        if (success) {
-          await deleteDoc(doc(db, "users", user.uid, "wishlist", item.id));
+      const availableItems = items.filter(i => !isItemOutOfStock(i));
+      for (const item of availableItems) {
+        const added = await addToCart(item, 1);
+        if (added) {
+          await removeItem(item.id);
         }
       }
-      setItems(prev => prev.filter(i => isItemOutOfStock(i)));
-    } catch (err) {
-      console.error("Error moving all to cart:", err);
     } finally {
       setMovingAll(false);
     }
   };
 
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login');
-    }
-  }, [user, loading, navigate]);
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8F4EF] flex items-center justify-center">
-        <div className="relative flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-[#2e0e43]"></div>
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#2e0e43]">Loading Private Collection</p>
+      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
+        <div className="relative flex items-center justify-center">
+          <div className="w-12 h-12 border-2 border-[#956638]/20 border-t-[#956638] rounded-full animate-spin" />
+          <Gem size={18} className="absolute text-[#956638] animate-pulse" />
         </div>
       </div>
     );
@@ -155,146 +132,109 @@ const Wishlist = () => {
   const displayedItems = filter === "inStock" ? inStockItems : items;
 
   return (
-    <div className="min-h-screen bg-[#F8F4EF] font-sans text-[#2A2623]">
+    <div className="min-h-screen bg-[#FAF7F2] font-body text-[#211A16]">
 
-      {/* Hero Breadcrumb */}
-      <Breadcrumb
-        title="My Private Collection"
-        subtitle="A curated editorial gallery of bespoke high jewellery, saved for your next celebration."
-        bgImage="https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&q=80&w=1600"
-        links={[
-          { name: 'Home', href: '/' },
-          { name: 'Shop', href: '/shop' },
-          { name: 'Wishlist', href: '/wishlist', active: true }
-        ]}
-      />
-
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10 pb-28">
-
-        {/* Top Atelier Header Suite */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-[#D8CBBE]/40">
-
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[14px] font-sans font-semibold uppercase tracking-[0.25em] text-[#C8A46A]">
-                ✦ Zenzies Private Selection ✦
-              </span>
+      {/* ── Refined Light Header / Breadcrumb ── */}
+      <div className="w-full bg-[#FAF7F2] border-b border-[#E8DDD2] pt-24 sm:pt-28 pb-5">
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-[#6B5E52] mb-3">
+            <Link to="/" className="hover:text-[#956638] transition-colors">Home</Link>
+            <span className="text-[#9E9082]">/</span>
+            <Link to="/shop" className="hover:text-[#956638] transition-colors">Shop</Link>
+            <span className="text-[#9E9082]">/</span>
+            <span className="text-[#211A16] font-semibold">Wishlist</span>
+          </nav>
+          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+            <div>
+              <span className="eyebrow-text block">Private Gallery</span>
+              <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#211A16] font-normal tracking-tight mt-0.5">
+                My Saved Wishlist
+                <span className="ml-3 text-xs font-body font-semibold text-[#956638] bg-[#FAF2E8] border border-[#956638]/30 px-3 py-1 rounded-full uppercase tracking-wider">
+                  {items.length} {items.length === 1 ? 'Piece' : 'Pieces'}
+                </span>
+              </h1>
             </div>
-            <h1 className="text-xl sm:text-3xl font-serif text-[#2e0e43] font-normal tracking-tight flex items-center gap-2.5">
-              My Wishlist Gallery
-              <span className="text-xs sm:text-sm text-[#7B6D63] font-sans font-normal bg-[#2e0e43]/5 border border-[#2e0e43]/10 px-2.5 py-0.5 rounded-full">
-                {items.length} {items.length === 1 ? 'Piece' : 'Pieces'}
-              </span>
-            </h1>
-            <p className="text-xs sm:text-sm text-[#7B6D63] font-serif leading-relaxed max-w-xl">
-              Your personal gallery of handcrafted masterpieces saved for acquisition.
-            </p>
-          </div>
-
-          {/* Action Suite Buttons */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
-            {items.length > 0 && inStockItems.length > 0 && (
-              <button
-                onClick={handleMoveAllToCart}
-                disabled={movingAll}
-                className="px-4 py-2.5 rounded-xl bg-[#2e0e43] text-white text-xs font-semibold uppercase tracking-[0.18em] hover:bg-[#1A0829] active:scale-[0.99] transition-all duration-300 shadow-sm hover:shadow-md flex items-center gap-2 disabled:opacity-50 cursor-pointer font-sans"
+            <div className="flex items-center gap-3">
+              {items.length > 0 && inStockItems.length > 0 && (
+                <button
+                  onClick={handleMoveAllToCart}
+                  disabled={movingAll}
+                  className="btn-luxury-primary text-xs py-2 px-4 min-h-[40px]"
+                >
+                  {movingAll ? <Loader2 size={13} className="animate-spin" /> : <ShoppingBag size={13} />}
+                  <span>{movingAll ? "Moving..." : "Move All to Bag"}</span>
+                </button>
+              )}
+              <Link
+                to="/cart"
+                className="btn-luxury-secondary text-xs py-2 px-4 min-h-[40px]"
               >
-                {movingAll ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <ShoppingBag size={14} className="text-[#C8A46A]" />
-                )}
-                <span>{movingAll ? "Moving..." : "Move All to Bag"}</span>
-              </button>
-            )}
-
-            <Link
-              to="/cart"
-              className="px-3.5 py-2.5 rounded-xl bg-white border border-[#D8CBBE] text-[#2e0e43] hover:border-[#2e0e43] hover:bg-[#FDFAF5] text-xs font-semibold uppercase tracking-[0.18em] transition-all duration-300 shadow-2xs flex items-center gap-1.5 font-sans"
-            >
-              <ShoppingBag size={14} className="text-[#C8A46A]" />
-              <span>Bag ({cartCount})</span>
-            </Link>
-
-            <Link
-              to="/shop"
-              className="px-3.5 py-2.5 rounded-xl bg-transparent border border-[#D8CBBE] text-[#7B6D63] hover:text-[#2A2623] hover:border-[#2A2623] text-xs font-semibold uppercase tracking-[0.18em] transition-all duration-300 flex items-center gap-1.5 font-sans"
-            >
-              <ArrowLeft size={14} />
-              <span>Boutique</span>
-            </Link>
+                <span>Bag ({cartCount})</span>
+              </Link>
+            </div>
           </div>
-
         </div>
+      </div>
 
-        {/* Filter Pills Bar */}
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 pb-32 lg:pb-24">
+
+        {/* Filter Pills */}
         {items.length > 0 && (
           <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setFilter("all")}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${filter === "all"
-                  ? "bg-[#2e0e43] text-white shadow-xs"
-                  : "bg-white text-[#7B6D63] border border-[#D8CBBE]/60 hover:border-[#2e0e43]"
-                  }`}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border ${
+                  filter === "all"
+                    ? "bg-[#211A16] text-white border-[#211A16]"
+                    : "bg-white text-[#6B5E52] border-[#E8DDD2] hover:border-[#956638]"
+                }`}
               >
                 All Saved ({items.length})
               </button>
               <button
                 onClick={() => setFilter("inStock")}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${filter === "inStock"
-                  ? "bg-[#2e0e43] text-white shadow-xs"
-                  : "bg-white text-[#7B6D63] border border-[#D8CBBE]/60 hover:border-[#2e0e43]"
-                  }`}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border ${
+                  filter === "inStock"
+                    ? "bg-[#211A16] text-white border-[#211A16]"
+                    : "bg-white text-[#6B5E52] border-[#E8DDD2] hover:border-[#956638]"
+                }`}
               >
                 In Stock ({inStockItems.length})
               </button>
             </div>
-
-            <p className="text-xs font-serif text-[#7B6D63] italic hidden sm:block">
-              Showing {displayedItems.length} of {items.length} saved creations
+            <p className="text-xs text-[#6B5E52] hidden sm:block">
+              Showing {displayedItems.length} of {items.length} saved pieces
             </p>
           </div>
         )}
 
-        {/* Main Wishlist Gallery */}
+        {/* Gallery */}
         {items.length === 0 ? (
-          /* Empty Gallery State */
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="py-16 sm:py-24 px-6 rounded-3xl bg-white border border-[#D8CBBE]/50 shadow-sm text-center max-w-lg mx-auto space-y-5"
+            className="card-luxury py-16 sm:py-20 px-6 text-center max-w-lg mx-auto space-y-4"
           >
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#F4EEE8] border border-[#C8A46A]/40 flex items-center justify-center mx-auto shadow-inner">
-              <Heart size={32} className="text-[#2e0e43]" strokeWidth={1.5} />
+            <div className="w-16 h-16 rounded-full bg-[#FAF2E8] border border-[#956638]/30 flex items-center justify-center mx-auto text-[#956638]">
+              <Heart size={28} strokeWidth={1.5} />
             </div>
-
-            <div className="space-y-1.5">
-              <span className="text-xs uppercase font-semibold tracking-[0.25em] text-[#C8A46A] block">
-                Gallery Empty
-              </span>
-              <h2 className="font-serif text-2xl sm:text-3xl text-[#2e0e43] font-normal">
-                Your Private Gallery is Empty
-              </h2>
-              <p className="text-xs sm:text-sm text-[#7B6D63] font-serif leading-relaxed max-w-md mx-auto">
-                Discover our high-jewellery catalog and curate your personal collection of timeless treasures.
-              </p>
-            </div>
-
+            <h2 className="font-serif text-2xl sm:text-3xl text-[#211A16] font-normal">
+              Your Wishlist is Empty
+            </h2>
+            <p className="body-text text-sm sm:text-base text-[#6B5E52] max-w-md mx-auto">
+              Save your favorite organizer boxes and handcrafted jewellery pieces to view and acquire them later.
+            </p>
             <div className="pt-2">
-              <Link
-                to="/shop"
-                className="inline-flex items-center justify-center gap-2 bg-[#2e0e43] text-white px-7 py-3 rounded-xl text-xs font-semibold uppercase tracking-[0.2em] hover:bg-[#1A0829] transition-all duration-300 shadow-md hover:shadow-lg font-sans"
-              >
-                <span>Explore Boutique</span>
+              <Link to="/shop" className="btn-luxury-primary">
+                <span>Explore Boutique Catalogue</span>
                 <ArrowRight size={14} />
               </Link>
             </div>
           </motion.div>
         ) : (
-          /* Editorial High-Jewellery Product Gallery Grid (2 COLUMNS ON MOBILE!) */
           <AnimatePresence mode="popLayout">
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {displayedItems.map((item, idx) => {
                 const isOutOfStock = isItemOutOfStock(item);
                 return (
@@ -305,11 +245,11 @@ const Wishlist = () => {
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ delay: idx * 0.03 }}
                     key={item.id}
-                    className="bg-white border border-[#D8CBBE]/50 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-xs hover:shadow-xl hover:border-[#C8A46A] transition-all duration-300 flex flex-col justify-between group relative"
+                    className="card-luxury p-3.5 sm:p-5 flex flex-col justify-between group hover:-translate-y-1.5 transition-all duration-300 relative"
                   >
                     <div>
-                      {/* Image Showcase Container */}
-                      <div className="aspect-[4/5] rounded-xl sm:rounded-2xl overflow-hidden bg-[#F4EEE8] relative mb-3 sm:mb-4 border border-[#D8CBBE]/30">
+                      {/* Image Box */}
+                      <div className="aspect-square rounded-xl overflow-hidden bg-[#FAF7F2] border border-[#E8DDD2] relative mb-3">
                         <img
                           src={getOptimizedImageUrl(item.image)}
                           alt={item.name}
@@ -318,88 +258,66 @@ const Wishlist = () => {
                           onError={(e) => handleImageError(e, item.image)}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <div className="absolute inset-0 bg-[#2A2623]/0 group-hover:bg-[#2A2623]/5 transition-colors duration-300" />
 
-                        {/* Top-Left Saved Badge */}
-                        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white/90 backdrop-blur-md border border-[#C8A46A]/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full flex items-center gap-1 shadow-2xs">
-                          <Heart size={10} className="text-[#C8A46A] fill-[#C8A46A]" />
-                          <span className="text-[14px] sm:text-[14px] font-semibold uppercase tracking-wider text-[#2e0e43] font-sans">Saved</span>
-                        </div>
-
-                        {/* Top-Right Trash Action Button */}
+                        {/* Top-Right Trash Button */}
                         <button
                           onClick={(e) => { e.stopPropagation(); removeItem(item.id); }}
-                          className="absolute top-2 right-2 sm:top-3 sm:right-3 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 backdrop-blur-md border border-[#D8CBBE]/60 rounded-full flex items-center justify-center text-[#7B6D63] hover:text-red-700 hover:bg-red-50 hover:border-red-200 transition-all shadow-2xs"
+                          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 border border-[#E8DDD2] flex items-center justify-center text-[#9E9082] hover:text-rose-700 hover:bg-rose-50 hover:border-rose-200 transition-all shadow-xs cursor-pointer"
                           title="Remove from wishlist"
                         >
                           <Trash2 size={13} />
                         </button>
                       </div>
 
-                      {/* Item Information */}
-                      <div className="space-y-1 sm:space-y-2 px-0.5">
-
-                        {/* Brand Tag */}
-                        <span className="text-[14px] sm:text-[14px] font-sans font-semibold uppercase tracking-[0.2em] text-[#C8A46A] block truncate">
-                          {item.brand || "Zenzies"}
+                      {/* Info */}
+                      <div className="space-y-1">
+                        <span className="eyebrow-text block text-[11px] truncate">
+                          {item.brand || item.category || "Zenzies"}
                         </span>
-
-                        {/* Product Title */}
                         <Link
                           to={`/product/${item.id}`}
-                          className="text-xs sm:text-base font-serif text-[#2A2623] hover:text-[#2e0e43] transition-colors leading-snug font-normal line-clamp-1 sm:line-clamp-2 block"
+                          className="font-serif text-sm sm:text-base text-[#211A16] hover:text-[#956638] transition-colors leading-snug line-clamp-1 block"
                         >
                           {item.name}
                         </Link>
-
-                        {/* Price & Stock Pill */}
-                        <div className="flex flex-wrap items-center justify-between gap-1 pt-0.5">
-                          <div className="flex items-baseline gap-1.5">
-                            <span className="text-sm sm:text-base font-normal text-[#2e0e43] font-sans">
-                              ₹{Number(item.price || 0).toLocaleString()}
-                            </span>
-                            {Number(item.original_price) > Number(item.price) && (
-                              <span className="text-[14px] sm:text-xs text-[#7B6D63]/50 line-through font-sans hidden sm:inline-block">
-                                ₹{Number(item.original_price).toLocaleString()}
-                              </span>
-                            )}
-                          </div>
-
-                          <span className={`text-[14px] sm:text-[14px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${isOutOfStock ? "bg-rose-50 text-rose-700 border border-rose-200" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            }`}>
-                            {isOutOfStock ? "Out of Stock" : "In Stock"}
+                        <div className="flex items-baseline gap-2 pt-1">
+                          <span className="font-serif text-base sm:text-lg text-[#211A16] font-medium">
+                            ₹{Number(item.price || 0).toLocaleString()}
                           </span>
+                          {Number(item.original_price) > Number(item.price) && (
+                            <span className="text-xs text-[#9E9082] line-through">
+                              ₹{Number(item.original_price).toLocaleString()}
+                            </span>
+                          )}
                         </div>
-
                       </div>
                     </div>
 
-                    {/* Card Bottom CTA Button */}
-                    <div className="pt-3 mt-1">
+                    {/* Bottom Action */}
+                    <div className="pt-3 border-t border-[#F2EBE1] mt-3">
                       {isOutOfStock ? (
                         <button
                           onClick={() => setNotifyProduct(item)}
-                          className="w-full py-2.5 sm:py-3 px-3 rounded-xl text-[14px] sm:text-xs font-semibold uppercase tracking-[0.18em] flex items-center justify-center gap-1.5 transition-all duration-300 shadow-2xs bg-[#2e0e43] text-white hover:bg-[#1A0829] active:scale-[0.99] hover:shadow-md cursor-pointer border border-[#C8A46A]/40"
+                          className="btn-luxury-dark w-full text-xs min-h-[40px] justify-center"
                         >
-                          <Bell size={13} className="shrink-0 text-[#C8A46A] animate-pulse" />
+                          <Bell size={13} className="text-[#C9A66B]" />
                           <span>Notify Me</span>
                         </button>
                       ) : (
                         <button
                           onClick={() => moveToCart(item)}
                           disabled={movingItems[item.id]}
-                          className="w-full py-2.5 sm:py-3 px-3 rounded-xl text-[14px] sm:text-xs font-semibold uppercase tracking-[0.18em] flex items-center justify-center gap-1.5 transition-all duration-300 shadow-2xs bg-[#2e0e43] text-white hover:bg-[#1A0829] active:scale-[0.99] hover:shadow-md cursor-pointer font-sans"
+                          className="btn-luxury-primary w-full text-xs min-h-[40px] justify-center disabled:opacity-50"
                         >
                           {movingItems[item.id] ? (
-                            <Loader2 size={13} className="animate-spin shrink-0" />
+                            <Loader2 size={13} className="animate-spin" />
                           ) : (
-                            <ShoppingBag size={13} className="shrink-0 text-[#C8A46A]" />
+                            <ShoppingBag size={13} />
                           )}
                           <span>{movingItems[item.id] ? "Moving..." : "Move to Bag"}</span>
                         </button>
                       )}
                     </div>
-
                   </motion.div>
                 );
               })}
@@ -407,7 +325,7 @@ const Wishlist = () => {
           </AnimatePresence>
         )}
 
-        {/* Back in stock notification modal for wishlist items */}
+        {/* Back in stock notification modal */}
         <NotifyMeModal
           isOpen={!!notifyProduct}
           onClose={() => setNotifyProduct(null)}

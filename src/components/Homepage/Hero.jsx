@@ -25,6 +25,10 @@ const DEFAULT_HERO = {
   btn2Link: "/shop?category=Jewellery+Boxes",
   videoURL: "/img/video1.mp4",
   posterURL: "/img/zenzies/hero_banner_lifestyle.png",
+  heroHeight: "650px",
+  overlayType: "none",
+  overlayOpacity: 0,
+  overlayColor: "#000000",
   benefits: DEFAULT_HERO_BENEFITS,
 };
 
@@ -62,6 +66,10 @@ const Hero = () => {
         setHeroConfig({
           videoURL: data.videoURL || "",
           posterURL: data.posterURL || "",
+          heroHeight: data.heroHeight || "",
+          overlayType: data.overlayType || "none",
+          overlayOpacity: data.overlayOpacity !== undefined ? Number(data.overlayOpacity) : 0,
+          overlayColor: data.overlayColor || "#000000",
           eyebrow: data.eyebrow !== undefined ? data.eyebrow : DEFAULT_HERO.eyebrow,
           line1: l1 !== undefined ? l1 : DEFAULT_HERO.line1,
           line2: l2 !== undefined ? l2 : DEFAULT_HERO.line2,
@@ -74,9 +82,9 @@ const Hero = () => {
           titleFontSize: data.titleFontSize || "",
           subtitleFontSize: data.subtitleFontSize || "",
           badgeFontSize: data.badgeFontSize || "",
-          benefits: Array.isArray(data.benefits) && data.benefits.length > 0
+          benefits: Array.isArray(data.benefits)
             ? data.benefits
-            : DEFAULT_HERO_BENEFITS,
+            : (data.benefits === undefined ? DEFAULT_HERO_BENEFITS : []),
         });
       }
     });
@@ -93,6 +101,8 @@ const Hero = () => {
   // Background fallback image
   const resolvedBgImage = heroConfig.posterURL || design.backgroundImage || '/img/zenzies/hero_banner_lifestyle.png';
 
+  const customHeight = heroConfig.heroHeight || design.heroHeight;
+
   // Build responsive style for container
   const heroStyle = {
     ...containerStyle,
@@ -100,6 +110,7 @@ const Hero = () => {
     backgroundSize: design.backgroundSize || 'cover',
     backgroundPosition: design.backgroundPosition || 'center right',
     backgroundRepeat: 'no-repeat',
+    ...(customHeight ? { minHeight: customHeight } : {}),
   };
 
   const hasActiveVideo = Boolean(heroConfig.videoURL && !videoError);
@@ -107,7 +118,9 @@ const Hero = () => {
   return (
     <section
       style={heroStyle}
-      className="relative w-full overflow-hidden border-b border-[#E8DDD2] min-h-[520px] sm:min-h-[580px] lg:min-h-[600px] xl:min-h-[640px] flex items-center"
+      className={`relative w-full overflow-hidden border-b border-[#E8DDD2] flex items-center ${
+        !customHeight ? "min-h-[520px] sm:min-h-[580px] lg:min-h-[600px] xl:min-h-[640px]" : ""
+      }`}
     >
       {/* Background Video Layer (Autoplay Ambient loop if provided) */}
       {hasActiveVideo && (
@@ -126,19 +139,41 @@ const Hero = () => {
         </video>
       )}
 
-      {/* Optional Admin-configured Overlay */}
-      {overlayStyle && (
+      {/* Dynamic Admin-Configured Overlay (Default is 'none' / 0% for pure untouched background) */}
+      {heroConfig.overlayType === 'left_gradient' && heroConfig.overlayOpacity > 0 && (
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            background: `linear-gradient(to right, ${heroConfig.overlayColor || '#FAF6F0'} 0%, ${heroConfig.overlayColor || '#FAF6F0'}e6 45%, transparent 100%)`,
+            opacity: (heroConfig.overlayOpacity ?? 50) / 100,
+          }}
+        />
+      )}
+      {heroConfig.overlayType === 'dark' && heroConfig.overlayOpacity > 0 && (
+        <div
+          className="absolute inset-0 pointer-events-none z-0 bg-black"
+          style={{ opacity: (heroConfig.overlayOpacity ?? 40) / 100 }}
+        />
+      )}
+      {heroConfig.overlayType === 'light' && heroConfig.overlayOpacity > 0 && (
+        <div
+          className="absolute inset-0 pointer-events-none z-0 bg-[#FAF6F0]"
+          style={{ opacity: (heroConfig.overlayOpacity ?? 40) / 100 }}
+        />
+      )}
+      {heroConfig.overlayType === 'custom' && heroConfig.overlayOpacity > 0 && (
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            backgroundColor: heroConfig.overlayColor || '#000000',
+            opacity: (heroConfig.overlayOpacity ?? 40) / 100,
+          }}
+        />
+      )}
+      {/* Fallback to section design overlay only if hero overlay is not explicitly handled */}
+      {(!heroConfig.overlayType || heroConfig.overlayType === 'none') && overlayStyle && (
         <div className="absolute inset-0 pointer-events-none z-0" style={overlayStyle} />
       )}
-
-      {/* Subtle Warm Gradient Overlay on left to guarantee pristine text contrast and legibility */}
-      <div
-        className="absolute inset-0 pointer-events-none z-0 bg-gradient-to-r from-[#FAF6F0] via-[#FAF6F0]/90 via-45% to-transparent hidden lg:block"
-      />
-      {/* Mobile/Tablet backdrop to protect text readability */}
-      <div
-        className="absolute inset-0 pointer-events-none z-0 bg-[#FAF6F0]/92 lg:hidden"
-      />
 
       <div className="w-full max-w-[1640px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-12 sm:py-14 lg:py-16 relative z-10">
         <div className="w-full lg:max-w-[560px] xl:max-w-[640px] 2xl:max-w-[700px] text-left">

@@ -144,6 +144,9 @@ const CategorySection = () => {
   const viewAllText = design.viewAllText || 'View All Categories';
   const viewAllLink = design.viewAllLink || '/shop';
 
+  // Dynamically configure grid columns and max-width based on actual uploaded categories count
+  const count = categories.length;
+
   return (
     <section
       style={{
@@ -171,11 +174,11 @@ const CategorySection = () => {
         <path d="M30 110 C 20 98, 18 82, 32 86 C 40 92, 36 104, 30 110 Z" strokeLinejoin="round" fill="currentColor" fillOpacity="0.05" />
       </svg>
 
-      {/* Almost full-width luxury container */}
-      <div className="w-full max-w-[1680px] 2xl:max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-10 sm:py-12 lg:py-14 relative z-10">
+      {/* Dynamic luxury container */}
+      <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-10 sm:py-12 lg:py-16 relative z-10">
 
         {/* Section Header: Centered Eyebrow with Divider Lines, Heading with Pink Accent, Description + Aligned Right Pill Link */}
-        <div className="relative mb-8 sm:mb-10">
+        <div className="relative mb-8 sm:mb-12">
 
           {/* Centered Editorial Header Content */}
           <div className="text-center space-y-1.5 max-w-2xl mx-auto px-4">
@@ -192,7 +195,7 @@ const CategorySection = () => {
             </div>
 
             <h2
-              className="font-serif text-[32px] sm:text-[42px] lg:text-[46px] font-medium leading-[1.12] tracking-tight m-0"
+              className="font-serif text-[32px] sm:text-[42px] lg:text-[48px] font-medium leading-[1.12] tracking-tight m-0"
               style={{ color: design.titleColor || '#1F1813', fontSize: design.titleFontSize || undefined }}
             >
               Find Your{' '}
@@ -223,43 +226,53 @@ const CategorySection = () => {
           </div>
         </div>
 
-        {/* 7 Vertical Product Box Cards (matches user screenshot exactly) */}
-        <div className="flex lg:grid lg:grid-cols-7 gap-3.5 sm:gap-4 lg:gap-3 xl:gap-4 overflow-x-auto lg:overflow-visible no-scrollbar pb-4 pt-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* Center-aligned, high-visibility Category Cards (Responsive across mobile, tablet & desktop up to 400px width) */}
+        <div className="flex items-stretch justify-start lg:justify-center gap-3 sm:gap-4 lg:gap-3.5 xl:gap-4 overflow-x-auto lg:overflow-visible no-scrollbar pb-8 pt-4 px-4 sm:px-6 lg:px-0 mx-auto w-full max-w-[1920px] snap-x snap-mandatory">
           {categories.map((cat, idx) => (
             <Link
               key={cat.id || idx}
               to={cat.link}
-              className="flex-shrink-0 w-[165px] sm:w-[195px] lg:w-auto bg-white rounded-[20px] sm:rounded-[22px] p-2.5 sm:p-3 shadow-[0_8px_24px_rgba(40,30,20,0.07)] hover:shadow-[0_22px_44px_-6px_rgba(40,30,20,0.22)] hover:-translate-y-2.5 sm:hover:-translate-y-3 hover:scale-[1.018] transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] border border-[#EFE8E1] flex flex-col group will-change-transform"
+              className="flex-shrink-0 w-[84vw] sm:w-[340px] md:w-[360px] lg:w-auto lg:flex-1 lg:max-w-[400px] lg:min-w-[230px] snap-center bg-white rounded-[24px] sm:rounded-[28px] p-3 sm:p-3.5 xl:p-4 shadow-[0_8px_24px_rgba(40,30,20,0.06)] hover:shadow-[0_30px_60px_-12px_rgba(35,25,15,0.22),0_12px_24px_-4px_rgba(35,25,15,0.12)] hover:-translate-y-4 hover:scale-[1.03] lg:hover:scale-[1.035] transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] border border-[#EFE8E1] hover:border-white hover:ring-2 hover:ring-[#A26B38]/25 flex flex-col group will-change-transform relative z-10 hover:z-30 cursor-pointer"
             >
-              {/* Product Card Image Box: Vertical rounded image window with hover zoom */}
-              <div className="rounded-[15px] sm:rounded-[17px] overflow-hidden aspect-[4/4.7] relative bg-[#F5EFE9] w-full">
+              {/* Product Card Image Box: High visibility vertical window with diagonal light flash on hover */}
+              <div className="rounded-[18px] sm:rounded-[22px] overflow-hidden aspect-[4/4.8] min-h-[280px] sm:min-h-[340px] md:min-h-[380px] lg:min-h-[360px] xl:min-h-[400px] relative bg-[#F7F2EB] w-full">
                 <img
                   src={getOptimizedImageUrl(cat.image)}
                   alt={cat.name}
                   loading="lazy"
                   decoding="async"
                   onError={(e) => handleImageError(e, cat.image)}
-                  className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-600 ease-out"
+                  className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
                 />
+
+                {/* Diagonal Light Flash / Shimmer Sweep: Top-Left to Bottom-Right on Hover */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden z-20 rounded-[18px] sm:rounded-[22px]">
+                  <div
+                    className="absolute -top-[120%] -left-[120%] w-[340%] h-[340%] pointer-events-none -translate-x-[100%] -translate-y-[100%] group-hover:translate-x-[75%] group-hover:translate-y-[75%] transition-transform duration-1000 ease-out opacity-0 group-hover:opacity-100"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.18) 58%, rgba(255,255,255,0) 70%)',
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Bottom Info Bar: Title + Designs Subtitle on Left, Round Arrow Button on Right */}
-              <div className="pt-3 pb-1 px-1 sm:px-1.5 flex items-center justify-between gap-1.5 mt-auto">
+              <div className="pt-3.5 pb-1 px-1 sm:px-1.5 flex items-center justify-between gap-2 mt-auto">
                 <div className="min-w-0 pr-1">
                   <h3
-                    className="font-serif text-[17px] sm:text-[19px] lg:text-[17px] xl:text-[19.5px] font-semibold text-[#1F1713] tracking-tight leading-tight group-hover:text-[#956638] transition-colors truncate"
+                    className="font-serif text-[19px] sm:text-[21px] lg:text-[20px] xl:text-[22px] font-semibold text-[#1F1713] tracking-tight leading-tight group-hover:text-[#956638] transition-colors truncate"
                     style={{ fontSize: design.cardLabelFontSize || undefined }}
                   >
                     {cat.name}
                   </h3>
-                  <span className="font-sans text-[9px] sm:text-[10px] xl:text-[10.5px] font-semibold tracking-[0.16em] uppercase text-[#A09389] mt-0.5 block truncate">
+                  <span className="font-sans text-[10px] sm:text-[11px] font-semibold tracking-[0.18em] uppercase text-[#A09389] mt-1 block truncate">
                     {cat.tag || 'EXPLORE'}
                   </span>
                 </div>
 
                 {/* Circular Action Button with Hover Elevation & Luxury Gradient */}
                 <div
-                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 shadow-xs ${
+                  className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 shadow-xs ${
                     cat.btnTheme === 'rose'
                       ? 'bg-[#DF8C7F] text-white group-hover:shadow-md'
                       : 'bg-[#EFE5DB] text-[#6E4F39] group-hover:bg-[#DF8C7F] group-hover:text-white group-hover:shadow-md'
@@ -270,7 +283,7 @@ const CategorySection = () => {
                       : undefined
                   }
                 >
-                  <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform duration-200" />
+                  <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform duration-200" />
                 </div>
               </div>
             </Link>

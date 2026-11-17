@@ -62,7 +62,7 @@ const Newsletter = () => {
               {title}
             </h2>
             <p
-              className="text-xs sm:text-sm font-sans leading-relaxed max-w-lg"
+              className="text-sm sm:text-base font-body leading-relaxed max-w-lg"
               style={{ color: design.subtitleColor || '#6B5E52', fontSize: design.subtitleFontSize || undefined }}
             >
               {subtitle}
@@ -73,7 +73,7 @@ const Newsletter = () => {
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-[#DFCBB9] text-[#211A16] text-xs sm:text-sm font-medium w-fit"
+                  className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-[#DFCBB9] text-[#211A16] text-sm font-medium w-fit"
                 >
                   <CheckCircle2 size={18} className="text-[#956638]" />
                   <span>Thank you for subscribing! Check your inbox soon for your special gift code.</span>
@@ -86,12 +86,12 @@ const Newsletter = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email address"
-                    className="flex-1 px-4 py-3 sm:py-3.5 bg-white border border-[#DFCBB9] rounded-[6px] text-xs sm:text-sm font-sans text-[#211A16] placeholder:text-[#6B5E52]/70 outline-none focus:border-[#956638] focus:ring-1 focus:ring-[#956638] transition-all shadow-xs"
+                    className="input-luxury flex-1 px-4 min-h-[48px] text-sm bg-white"
                   />
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 sm:px-7 py-3 sm:py-3.5 rounded-[6px] text-white text-xs sm:text-sm font-sans font-semibold tracking-wide transition-all shadow-md hover:brightness-105 hover:shadow-lg shrink-0 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60 active:scale-95"
+                    className="btn-luxury-primary px-7 min-h-[48px] text-xs font-semibold tracking-wider uppercase shrink-0"
                     style={{ background: design.btnGradient || btnGradient, color: design.btnTextColor || '#FFFFFF' }}
                   >
                     {loading ? (

@@ -1,0 +1,394 @@
+/* ===================================================================
+   ZENZIES LUXURY DESIGN SYSTEM
+   Central Design Tokens, Typography Scales & Component Primitives
+   =================================================================== */
+
+:root {
+  /* ── 1. Brand Color Palette ── */
+  --color-primary: #4B245D;         /* Deep Imperial Plum */
+  --color-primary-dark: #2E0E43;    /* Royal Midnight Plum */
+  --color-primary-light: #6A3A82;
+
+  --color-secondary: #956638;       /* Warm Artisan Caramel Gold */
+  --color-secondary-hover: #7D532B;
+  --color-secondary-light: #B58E58;
+
+  --color-accent: #C9A66B;          /* Champagne Gold */
+  --color-accent-light: #E0C79B;
+  --color-accent-soft: #F4E8D4;
+
+  --color-background: #FAF7F2;      /* Warm Ivory Canvas */
+  --color-surface: #FFFFFF;         /* Crisp White */
+  --color-surface-alt: #F5EFE6;     /* Cream Surface */
+  --color-surface-soft: #FBF9F5;    /* Pearl Warm */
+
+  --color-text-primary: #211A16;    /* Deep Roasted Espresso */
+  --color-text-secondary: #6B5E52;  /* Muted Taupe */
+  --color-text-muted: #9E9082;      /* Soft Pebble */
+  --color-text-light: #FAF7F2;      /* Ivory On Dark */
+
+  --color-border: #E8DDD2;          /* Subtle Warm Sand Border */
+  --color-border-light: #F2EBE1;
+  --color-border-dark: #D4C3B2;
+
+  --color-success: #2E7D32;
+  --color-success-bg: #E8F5E9;
+  --color-error: #C62828;
+  --color-error-bg: #FFEBEE;
+
+  /* ── 2. Typography Families ── */
+  --font-heading: "GFS Didot", "Cormorant Garamond", Georgia, serif;
+  --font-body: "Inter", "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-script: "Alex Brush", cursive;
+
+  /* ── 3. Fluid Typography Scale (Desktop & Mobile) ── */
+  --font-size-hero: clamp(2.25rem, 4.5vw, 3.75rem);    /* 36px - 60px */
+  --font-size-h1: clamp(1.875rem, 3.2vw, 2.75rem);     /* 30px - 44px */
+  --font-size-h2: clamp(1.5rem, 2.4vw, 2.125rem);      /* 24px - 34px */
+  --font-size-h3: clamp(1.25rem, 1.8vw, 1.625rem);     /* 20px - 26px */
+  --font-size-h4: clamp(1.125rem, 1.3vw, 1.375rem);    /* 18px - 22px */
+  --font-size-h5: 1.125rem;                             /* 18px */
+  --font-size-h6: 1rem;                                 /* 16px */
+
+  --font-size-body-lg: 1.125rem;                        /* 18px */
+  --font-size-body: 1rem;                               /* 16px (Default paragraph) */
+  --font-size-body-sm: 0.875rem;                        /* 14px (Secondary info) */
+  --font-size-caption: 0.75rem;                         /* 12px (Micro labels only) */
+
+  --font-size-button: 0.875rem;                         /* 14px */
+  --font-size-nav: 0.875rem;                            /* 14px */
+
+  /* ── 4. Font Weights ── */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ── 5. Line Heights ── */
+  --line-height-heading: 1.22;
+  --line-height-body: 1.65;
+  --line-height-compact: 1.35;
+
+  /* ── 6. Letter Spacing ── */
+  --letter-spacing-heading: -0.015em;
+  --letter-spacing-body: 0;
+  --letter-spacing-label: 0.16em;
+  --letter-spacing-eyebrow: 0.28em;
+
+  /* ── 7. Spacing Scale ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ── 8. Layout & Grid ── */
+  --container-width: 1280px;
+  --container-width-wide: 1400px;
+  --page-gutter: clamp(16px, 4vw, 48px);
+
+  /* ── 9. Component Dimensions & Radii ── */
+  --button-height: 48px;
+  --button-height-sm: 40px;
+  --input-height: 48px;
+  --card-radius: 14px;
+  --card-radius-sm: 10px;
+  --button-radius: 10px;
+  --badge-radius: 9999px;
+
+  /* ── 10. Shadows ── */
+  --shadow-card: 0 4px 18px rgba(33, 26, 22, 0.05), 0 1px 3px rgba(33, 26, 22, 0.03);
+  --shadow-hover: 0 14px 34px -4px rgba(33, 26, 22, 0.12), 0 6px 14px -2px rgba(33, 26, 22, 0.06);
+  --shadow-float: 0 20px 45px -8px rgba(33, 26, 22, 0.18);
+  --shadow-sticky: 0 12px 36px rgba(33, 26, 22, 0.14);
+
+  /* ── 11. Transitions ── */
+  --transition-fast: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 450ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ── 12. Dynamic Luxury Button Gradients ── */
+  --gradient-caramel: linear-gradient(135deg, #A8753E 0%, #7D532B 100%);
+  --gradient-caramel-hover: linear-gradient(135deg, #B58448 0%, #8C5E32 100%);
+  --gradient-gold: linear-gradient(135deg, #C9A66B 0%, #A8753E 100%);
+  --gradient-dark: linear-gradient(135deg, #2E0E43 0%, #1A0829 100%);
+}
+
+/* ── Semantic Typography Helper Classes ── */
+.font-heading {
+  font-family: var(--font-heading) !important;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.font-body {
+  font-family: var(--font-body) !important;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.font-script {
+  font-family: var(--font-script) !important;
+}
+
+.page-title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-heading);
+  color: var(--color-text-primary);
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-heading);
+  color: var(--color-text-primary);
+}
+
+.section-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--color-text-secondary);
+}
+
+.eyebrow-text {
+  font-family: var(--font-body);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.product-title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-heading);
+  color: var(--color-text-primary);
+}
+
+.product-price {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 2.2vw, 2.125rem);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.body-large {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-lg);
+  line-height: var(--line-height-body);
+  color: var(--color-text-secondary);
+}
+
+.body-text {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--color-text-secondary);
+}
+
+.body-small {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body);
+  color: var(--color-text-secondary);
+}
+
+.caption-text {
+  font-family: var(--font-body);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-compact);
+  color: var(--color-text-muted);
+}
+
+/* ── Standardized Button Primitives ── */
+.btn-luxury-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--button-height);
+  padding: 0 24px;
+  border-radius: var(--button-radius);
+  background: var(--gradient-caramel);
+  color: #FFFFFF !important;
+  font-family: var(--font-body);
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  border: 1px solid rgba(201, 166, 107, 0.3);
+  box-shadow: 0 4px 14px rgba(125, 83, 43, 0.22);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-luxury-primary:hover {
+  background: var(--gradient-caramel-hover);
+  box-shadow: 0 8px 22px rgba(125, 83, 43, 0.32);
+  transform: translateY(-1px);
+}
+
+.btn-luxury-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-luxury-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--button-height);
+  padding: 0 24px;
+  border-radius: var(--button-radius);
+  background: var(--color-surface);
+  color: var(--color-text-primary) !important;
+  font-family: var(--font-body);
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  border: 1.5px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+}
+
+.btn-luxury-secondary:hover {
+  border-color: var(--color-secondary);
+  background: var(--color-surface-alt);
+  color: var(--color-secondary) !important;
+  transform: translateY(-1px);
+}
+
+.btn-luxury-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--button-height);
+  padding: 0 24px;
+  border-radius: var(--button-radius);
+  background: var(--color-text-primary);
+  color: var(--color-text-light) !important;
+  font-family: var(--font-body);
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  border: 1px solid rgba(201, 166, 107, 0.25);
+  box-shadow: 0 4px 16px rgba(33, 26, 22, 0.16);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+}
+
+.btn-luxury-dark:hover {
+  background: #14100E;
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.btn-luxury-dark:active {
+  transform: scale(0.98);
+}
+
+/* ── Standardized Card & Surface Primitives ── */
+.card-luxury {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-normal);
+}
+
+.card-luxury:hover {
+  box-shadow: var(--shadow-hover);
+  border-color: var(--color-border-dark);
+}
+
+/* ── Standardized Input Primitives ── */
+.input-luxury {
+  min-height: var(--input-height);
+  padding: 0 16px;
+  border-radius: var(--button-radius);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-primary);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.input-luxury:focus {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(149, 102, 56, 0.12);
+}
+
+/* ── Standardized Badges ── */
+.badge-luxury {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--badge-radius);
+  font-family: var(--font-body);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  background: var(--color-surface-alt);
+  color: var(--color-secondary);
+  border: 1px solid rgba(149, 102, 56, 0.25);
+}
+
+.badge-luxury-dark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--badge-radius);
+  font-family: var(--font-body);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  background: var(--color-text-primary);
+  color: #FFFFFF;
+  border: 1px solid rgba(201, 166, 107, 0.35);
+}
+
+/* ── Standard Container ── */
+.container-custom {
+  width: 100%;
+  max-width: var(--container-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--page-gutter);
+  padding-right: var(--page-gutter);
+}
+
+.container-custom-wide {
+  width: 100%;
+  max-width: var(--container-width-wide);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--page-gutter);
+  padding-right: var(--page-gutter);
+}
+

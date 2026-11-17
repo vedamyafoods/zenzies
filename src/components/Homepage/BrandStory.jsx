@@ -82,7 +82,7 @@ const BrandStory = () => {
 
             {/* Description Body */}
             <p
-              className="text-xs sm:text-[13.5px] font-sans leading-[1.75] max-w-lg"
+              className="text-sm sm:text-base font-body leading-[1.75] max-w-lg"
               style={{ color: textColor, fontSize: design.descFontSize || undefined }}
             >
               {description}
@@ -94,7 +94,7 @@ const BrandStory = () => {
                 <Link
                   to={btnLink}
                   style={{ background: design.btnGradient || btnGradient, color: design.btnTextColor || '#FFFFFF' }}
-                  className="inline-flex items-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-[6px] text-white text-xs sm:text-sm font-sans font-semibold tracking-wide hover:brightness-105 hover:shadow-lg transition-all shadow-md active:scale-95"
+                  className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-[8px] min-h-[48px] text-white text-xs sm:text-sm font-body font-semibold tracking-wider uppercase hover:brightness-105 hover:shadow-lg transition-all shadow-md active:scale-95"
                 >
                   <span>{btnText}</span>
                   <ArrowRight size={14} />

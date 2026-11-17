@@ -2,18 +2,16 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../components/Firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import {
-  Search, Heart, ShoppingBag, Loader2, SlidersHorizontal, X, RotateCcw, Check, Sparkles, Tag,
-  Package, Gem, Gift
+  Search, SlidersHorizontal, X, RotateCcw, Check, Sparkles, Tag,
+  ShoppingBag, Gem
 } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../components/useAuth';
-import { useStore } from '../hooks/useStore';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import QuickView from '../components/QuickView';
 import Breadcrumb from '../components/Breadcrumb';
 import AddToCartModal from '../components/AddToCartModal';
+import ProductCard from '../components/ProductCard';
 import { listenToTags } from '../services/tagsService';
-import { getOptimizedImageUrl, handleImageError } from '../config/cloudinary';
 import useSEO from '../hooks/useSEO';
 
 const fallbackProducts = [
@@ -39,8 +37,6 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [sortBy, setSortBy] = useState('newest');
-  const [cartLoadings, setCartLoadings] = useState({});
-  const [wishlistLoadings, setWishlistLoadings] = useState({});
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [addModalProduct, setAddModalProduct] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -58,11 +54,11 @@ const Shop = () => {
   // Dynamic SEO based on active category
   const seoCategory = selectedCategory !== 'All' ? selectedCategory : null;
   const seoTitle = seoCategory
-    ? `Shop ${seoCategory} - Zenzies`
-    : 'Shop Jewellery Organizer Boxes, Fine Jewellery & Bundles - Zenzies';
+    ? `Shop ${seoCategory} | Zenzies Fine Jewellery & Organizers`
+    : 'Shop Jewellery Organizer Boxes & Handcrafted Jewellery | Zenzies';
   const seoDescription = seoCategory
-    ? `Explore Zenzies ${seoCategory.toLowerCase()} collection. Premium quality, luxury packaging, and fast insured delivery across India.`
-    : 'Shop the complete Zenzies collection: travel jewellery organizer boxes, fine jewellery, and curated bundles. Online payment only with express pan-India delivery.';
+    ? `Explore Zenzies ${seoCategory.toLowerCase()} collection. Premium anti-tarnish quality, velvet packaging, and express insured delivery across India.`
+    : 'Discover our complete catalogue of travel jewellery organizer boxes, anti-tarnish jewellery, and gift sets. Pan-India express delivery.';
 
   useSEO({
     title: seoTitle,
@@ -74,14 +70,7 @@ const Shop = () => {
       "@type": "CollectionPage",
       "name": seoTitle,
       "url": "https://www.zenzies.in/shop",
-      "description": seoDescription,
-      "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.zenzies.in/" },
-          { "@type": "ListItem", "position": 2, "name": "Shop", "item": "https://www.zenzies.in/shop" }
-        ]
-      }
+      "description": seoDescription
     }
   });
 
@@ -174,8 +163,6 @@ const Shop = () => {
     return () => unsubscribe();
   }, []);
 
-  const { addToCart, addToWishlist, isInCart, isInWishlist } = useStore();
-
   const maxProductPrice = useMemo(() => {
     if (!products || products.length === 0) return 20000;
     const maxP = Math.max(...products.map(p => Number(p.price) || 0));
@@ -217,30 +204,6 @@ const Shop = () => {
     });
     return counts;
   }, [products]);
-
-  const handleAddToCart = async (e, product) => {
-    e.stopPropagation();
-    setCartLoadings(prev => ({ ...prev, [product.id]: true }));
-    try {
-      const success = await addToCart(product);
-      if (success) {
-        setAddModalProduct(product);
-        setIsAddModalOpen(true);
-      }
-    } finally {
-      setCartLoadings(prev => ({ ...prev, [product.id]: false }));
-    }
-  };
-
-  const handleAddToWishlist = async (e, product) => {
-    e.stopPropagation();
-    setWishlistLoadings(prev => ({ ...prev, [product.id]: true }));
-    try {
-      await addToWishlist(product);
-    } finally {
-      setWishlistLoadings(prev => ({ ...prev, [product.id]: false }));
-    }
-  };
 
   const toggleMaterial = (mat) => {
     const nextMaterials = selectedMaterials.includes(mat)
@@ -305,23 +268,6 @@ const Shop = () => {
 
     const matchesTags = selectedTags.length === 0 || selectedTags.some(t => {
       const tagStr = t.toLowerCase().trim();
-      if (tagStr === 'new arrivals' || tagStr === 'new arrival') {
-        const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000;
-        const now = Date.now();
-        let prodTime = 0;
-        if (p.createdAt?.toMillis) {
-          prodTime = p.createdAt.toMillis();
-        } else if (p.createdAt?.seconds) {
-          prodTime = p.createdAt.seconds * 1000;
-        } else if (p.createdAt) {
-          prodTime = new Date(p.createdAt).getTime();
-        } else {
-          prodTime = now;
-        }
-        const isUploadedInLast30Days = (now - prodTime) <= thirtyDaysInMillis && prodTime <= now;
-        const hasExplicitTag = Array.isArray(p.tags) && p.tags.some(pt => String(pt).toLowerCase() === tagStr);
-        return isUploadedInLast30Days || hasExplicitTag;
-      }
       return Array.isArray(p.tags) && p.tags.some(pt => String(pt).toLowerCase() === tagStr);
     });
 
@@ -342,16 +288,21 @@ const Shop = () => {
     return 0;
   });
 
-  // Refined Sidebar Content Component
+  const handleAddToCartSuccess = (product) => {
+    setAddModalProduct(product);
+    setIsAddModalOpen(true);
+  };
+
+  // Reusable Sidebar Content
   const FilterSidebarContent = () => (
-    <div className="space-y-8 text-[#2A2623]">
-      {/* Sidebar Title Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-[#EFE8DC]">
-        <div className="flex items-center gap-2.5">
-          <SlidersHorizontal size={17} className="text-[#B58E58]" />
-          <h3 className="font-serif text-lg font-semibold tracking-wide text-[#2A2623]">FILTERS</h3>
+    <div className="space-y-6 text-[#211A16] font-body">
+      {/* Title */}
+      <div className="flex items-center justify-between pb-3.5 border-b border-[#E8DDD2]">
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal size={16} className="text-[#956638]" />
+          <h3 className="font-serif text-lg text-[#211A16] font-normal tracking-wide">Filters</h3>
           {activeFiltersCount > 0 && (
-            <span className="w-5 h-5 rounded-full bg-[#2e0e43] text-white text-[11px] font-bold flex items-center justify-center">
+            <span className="w-5 h-5 rounded-full bg-[#956638] text-white text-[11px] font-semibold flex items-center justify-center">
               {activeFiltersCount}
             </span>
           )}
@@ -359,7 +310,7 @@ const Shop = () => {
         {activeFiltersCount > 0 && (
           <button
             onClick={clearAllFilters}
-            className="text-[11px] uppercase tracking-widest font-semibold text-[#2e0e43] hover:text-[#2A2623] transition-colors flex items-center gap-1 cursor-pointer"
+            className="text-xs font-semibold uppercase tracking-wider text-[#956638] hover:text-[#211A16] transition-colors flex items-center gap-1 cursor-pointer"
           >
             <RotateCcw size={11} /> Reset
           </button>
@@ -367,9 +318,9 @@ const Shop = () => {
       </div>
 
       {/* Categories */}
-      <div className="space-y-3">
-        <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-[#B58E58] font-sans border-b border-[#EFE8DC]/60 pb-1.5">
-          CATEGORIES
+      <div className="space-y-2.5">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-[#956638]">
+          Categories
         </h4>
         <div className="space-y-1">
           {categories.map((cat) => {
@@ -381,13 +332,14 @@ const Shop = () => {
                   setSelectedCategory(cat);
                   updateFilterParam('category', cat);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs md:text-sm font-medium transition-all cursor-pointer ${isSelected
-                  ? 'bg-[#2e0e43] text-white shadow-sm font-semibold'
-                  : 'text-[#2A2623]/80 hover:bg-[#F5EFE6] hover:text-[#2e0e43]'
-                  }`}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-[#FAF2E8] text-[#956638] font-semibold border border-[#956638]/40 shadow-2xs'
+                    : 'text-[#6B5E52] hover:bg-white hover:text-[#211A16]'
+                }`}
               >
                 <span>{cat}</span>
-                <span className={`text-[11px] px-2 py-0.5 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-[#EFE8DC] text-[#7B6D63]'}`}>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${isSelected ? 'bg-[#956638] text-white' : 'bg-[#F2EBE1] text-[#9E9082]'}`}>
                   {categoryCounts[cat] ?? 0}
                 </span>
               </button>
@@ -397,10 +349,10 @@ const Shop = () => {
       </div>
 
       {/* Price Slider */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-[0.15em] text-[#B58E58] font-sans">
-          <span>PRICE RANGE</span>
-          <span className="text-[#2e0e43] font-bold">₹{Number(priceLimit).toLocaleString()}</span>
+      <div className="space-y-2.5 pt-3 border-t border-[#E8DDD2]">
+        <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-[#211A16]">
+          <span>Max Price</span>
+          <span className="text-[#956638] font-serif text-sm">₹{Number(priceLimit).toLocaleString()}</span>
         </div>
         <input
           type="range"
@@ -413,9 +365,9 @@ const Shop = () => {
             setPriceLimit(val);
             updateFilterParam('maxPrice', val);
           }}
-          className="w-full accent-[#2e0e43] cursor-pointer h-1.5 bg-[#EFE8DC] rounded-lg border-none"
+          className="w-full accent-[#956638] cursor-pointer h-1.5 bg-[#E8DDD2] rounded-lg border-none"
         />
-        <div className="flex justify-between text-[12px] text-[#7B6D63] font-medium font-sans">
+        <div className="flex justify-between text-xs text-[#9E9082]">
           <span>₹0</span>
           <span>₹{Number(maxProductPrice).toLocaleString()}</span>
         </div>
@@ -423,25 +375,23 @@ const Shop = () => {
 
       {/* Tags Filter */}
       {availableTags.length > 0 && (
-        <div className="space-y-3">
-          <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-[#B58E58] font-sans border-b border-[#EFE8DC]/60 pb-1.5 flex items-center gap-1.5">
-            <Tag size={13} className="text-[#B58E58]" /> TAGS & EDITIONS
+        <div className="space-y-2.5 pt-3 border-t border-[#E8DDD2]">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-[#956638] flex items-center gap-1.5">
+            <Tag size={13} /> Tags & Highlights
           </h4>
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="flex flex-wrap gap-1.5 pt-1">
             {availableTags.map((tagObj) => {
               const checked = selectedTags.some(t => t.toLowerCase() === tagObj.name.toLowerCase());
               return (
                 <button
                   key={tagObj.id}
                   onClick={() => toggleTag(tagObj.name)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border ${checked
-                    ? "bg-[#2e0e43] text-white border-[#2e0e43] shadow-xs"
-                    : "bg-[#FAF7F2] text-[#2A2623]/80 border-[#EFE8DC] hover:border-[#2e0e43]"
-                    }`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer border ${
+                    checked
+                      ? "bg-[#211A16] text-white border-[#211A16]"
+                      : "bg-white text-[#6B5E52] border-[#E8DDD2] hover:border-[#956638]"
+                  }`}
                 >
-                  <div className={`w-3.5 h-3.5 rounded flex items-center justify-center transition-all ${checked ? "bg-white text-[#2e0e43]" : "border border-[#D5C6B1] bg-white"}`}>
-                    {checked && <Check size={10} strokeWidth={3} />}
-                  </div>
                   <span>{tagObj.name}</span>
                 </button>
               );
@@ -450,22 +400,22 @@ const Shop = () => {
         </div>
       )}
 
-      {/* Material & Craft */}
-      <div className="space-y-3">
-        <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-[#B58E58] font-sans border-b border-[#EFE8DC]/60 pb-1.5">
-          MATERIAL & FINISH
+      {/* Materials */}
+      <div className="space-y-2.5 pt-3 border-t border-[#E8DDD2]">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-[#956638]">
+          Material & Finish
         </h4>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {materialsList.map((mat) => {
             const checked = selectedMaterials.includes(mat);
             return (
               <label
                 key={mat}
                 onClick={() => toggleMaterial(mat)}
-                className="flex items-center gap-2.5 cursor-pointer text-xs md:text-sm font-medium text-[#2A2623]/80 hover:text-[#2e0e43] transition-colors"
+                className="flex items-center gap-2.5 cursor-pointer text-sm text-[#6B5E52] hover:text-[#211A16] transition-colors"
               >
-                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${checked ? 'bg-[#2e0e43] border-[#2e0e43] text-white' : 'border-[#D5C6B1] bg-white'}`}>
-                  {checked && <Check size={10} strokeWidth={3} />}
+                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${checked ? 'bg-[#956638] border-[#956638] text-white' : 'border-[#E8DDD2] bg-white'}`}>
+                  {checked && <Check size={11} strokeWidth={3} />}
                 </div>
                 <span>{mat}</span>
               </label>
@@ -475,23 +425,23 @@ const Shop = () => {
       </div>
 
       {/* Availability */}
-      <div className="space-y-3">
-        <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-[#B58E58] font-sans border-b border-[#EFE8DC]/60 pb-1.5">
-          AVAILABILITY
+      <div className="space-y-2.5 pt-3 border-t border-[#E8DDD2]">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-[#956638]">
+          Availability
         </h4>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {[
             { id: 'all', label: 'All Items' },
             { id: 'inStock', label: 'In Stock Only' },
-            { id: 'onSale', label: 'On Sale / Discounted' },
+            { id: 'onSale', label: 'On Sale / Privilege' },
           ].map((opt) => (
             <label
               key={opt.id}
               onClick={() => setAvailability(opt.id)}
-              className="flex items-center gap-2.5 cursor-pointer text-xs md:text-sm font-medium text-[#2A2623]/80 hover:text-[#2e0e43] transition-colors"
+              className="flex items-center gap-2.5 cursor-pointer text-sm text-[#6B5E52] hover:text-[#211A16] transition-colors"
             >
-              <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${availability === opt.id ? 'border-[#2e0e43]' : 'border-[#D5C6B1] bg-white'}`}>
-                {availability === opt.id && <div className="w-2 h-2 rounded-full bg-[#2e0e43]" />}
+              <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${availability === opt.id ? 'border-[#956638]' : 'border-[#E8DDD2] bg-white'}`}>
+                {availability === opt.id && <div className="w-2 h-2 rounded-full bg-[#956638]" />}
               </div>
               <span>{opt.label}</span>
             </label>
@@ -502,22 +452,33 @@ const Shop = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] font-sans text-[#2A2623]">
+    <div className="min-h-screen bg-[#FAF7F2] font-body text-[#211A16]">
       {selectedProduct && <QuickView product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
 
-      {/* Premium Breadcrumb */}
-      <Breadcrumb
-        title="Our Collection"
-        subtitle="Discover luxury jewellery organizer boxes, fine jewellery, and curated combination gift sets."
-        bgImage="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=1600"
-        links={[
-          { name: 'Home', href: '/' },
-          { name: 'Shop', href: '/shop', active: true }
-        ]}
-      />
+      {/* ── Refined Light Header / Breadcrumb ── */}
+      <div className="w-full bg-[#FAF7F2] border-b border-[#E8DDD2] pt-24 sm:pt-28 pb-5">
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-[#6B5E52] mb-3">
+            <Link to="/" className="hover:text-[#956638] transition-colors">Home</Link>
+            <span className="text-[#9E9082]">/</span>
+            <span className="text-[#211A16] font-semibold">Shop Collection</span>
+          </nav>
+          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+            <div>
+              <span className="eyebrow-text block">Boutique Catalogue</span>
+              <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#211A16] font-normal tracking-tight mt-0.5">
+                {selectedCategory === 'All' ? 'Fine Jewellery & Organizer Boxes' : selectedCategory}
+              </h1>
+            </div>
+            <p className="text-xs sm:text-sm text-[#6B5E52]">
+              Showing {sortedProducts.length} {sortedProducts.length === 1 ? 'creation' : 'creations'}
+            </p>
+          </div>
+        </div>
+      </div>
 
-      {/* Category Quick Pills */}
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 pt-6 pb-2">
+      {/* ── Category Quick Pills Row ── */}
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 pt-6 pb-2">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
           {categories.map((cat) => {
             const isSelected = selectedCategory.toLowerCase() === cat.toLowerCase();
@@ -528,10 +489,11 @@ const Shop = () => {
                   setSelectedCategory(cat);
                   updateFilterParam('category', cat);
                 }}
-                className={`px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all shrink-0 cursor-pointer border ${isSelected
-                  ? 'bg-[#2e0e43] text-white border-[#2e0e43] shadow-sm'
-                  : 'bg-white text-[#2A2623] border-[#E8DFC8] hover:border-[#2e0e43] hover:text-[#2e0e43]'
-                  }`}
+                className={`px-4 py-2 rounded-full text-xs sm:text-sm transition-all shrink-0 cursor-pointer border ${
+                  isSelected
+                    ? 'bg-[#211A16] text-white border-[#211A16] shadow-sm font-semibold'
+                    : 'bg-white text-[#211A16] border-[#E8DDD2] hover:border-[#956638]'
+                }`}
               >
                 <span>{cat}</span>
                 <span className="ml-1.5 opacity-60 text-xs">({categoryCounts[cat] ?? 0})</span>
@@ -541,125 +503,123 @@ const Shop = () => {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-6 md:py-10">
-        <div className="flex flex-col lg:flex-row gap-8">
+      {/* ── Main Catalog Content Area ── */}
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 pb-32 lg:pb-24">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-          {/* Desktop Filter Sidebar */}
-          <aside className="hidden lg:block w-72 flex-shrink-0 bg-[#FFFDF9] p-6 rounded-2xl border border-[#EFE8DC] h-fit sticky top-28 shadow-[0_4px_25px_rgba(0,0,0,0.02)]">
+          {/* Desktop Filter Sidebar (Left) */}
+          <aside className="hidden lg:block w-72 shrink-0 card-luxury p-6 lg:sticky lg:top-24">
             <FilterSidebarContent />
           </aside>
 
-          {/* Main Catalog Content */}
-          <div className="flex-1 min-w-0">
+          {/* Main Catalog Column (Right) */}
+          <div className="flex-1 min-w-0 w-full">
 
-            {/* Top Control Bar: Search, Filter Drawer Button, Sort */}
-            <div className="bg-[#FFFDF9] p-4 rounded-2xl border border-[#EFE8DC] mb-6 space-y-3 shadow-[0_4px_25px_rgba(0,0,0,0.02)]">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Top Controls Bar: Search, Mobile Filters, Sort Dropdown */}
+            <div className="card-luxury p-4 mb-6 space-y-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
 
-                {/* Search Bar */}
+                {/* Search Input */}
                 <div className="relative w-full sm:max-w-md">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#B58E58]" size={15} />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#956638]" size={16} />
                   <input
                     type="text"
-                    placeholder="Search boxes, rings, earrings, bundles..."
-                    className="w-full bg-[#FAF7F2] border border-[#EFE8DC] rounded-xl pl-10 pr-9 py-2.5 text-xs md:text-sm text-[#2A2623] outline-none focus:border-[#2e0e43] transition-all placeholder:text-[#7B6D63]/50"
+                    placeholder="Search boxes, earrings, rings, bundles..."
+                    className="input-luxury w-full pl-10 pr-9 min-h-[42px] text-xs sm:text-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                   {searchTerm && (
-                    <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black cursor-pointer">
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black cursor-pointer"
+                    >
                       <X size={14} />
                     </button>
                   )}
                 </div>
 
-                {/* Right controls: Mobile Filter button + Sort drop-down */}
+                {/* Mobile Filter Button + Sort Dropdown */}
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                  {/* Mobile Filter Toggle Button */}
                   <button
                     onClick={() => setShowMobileFilters(true)}
-                    className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-[#2A2623] text-white rounded-xl text-xs font-semibold tracking-wider uppercase shadow-sm cursor-pointer"
+                    className="lg:hidden btn-luxury-dark text-xs min-h-[42px] px-4 py-2"
                   >
                     <SlidersHorizontal size={14} />
-                    Filters
+                    <span>Filters</span>
                     {activeFiltersCount > 0 && (
-                      <span className="w-4 h-4 rounded-full bg-[#2e0e43] text-white text-[11px] font-bold flex items-center justify-center">
+                      <span className="w-4 h-4 rounded-full bg-[#956638] text-white text-[10px] font-bold flex items-center justify-center">
                         {activeFiltersCount}
                       </span>
                     )}
                   </button>
 
-                  {/* Sort Selector */}
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[#B58E58] uppercase tracking-wider hidden md:inline font-sans">Sort:</span>
+                    <span className="text-xs font-semibold text-[#956638] uppercase tracking-wider hidden sm:inline">Sort:</span>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="bg-[#FAF7F2] border border-[#EFE8DC] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[#2A2623] outline-none focus:border-[#2e0e43] transition-all cursor-pointer appearance-none pr-8 font-sans"
-                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23B58E58' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center' }}
+                      className="input-luxury text-xs py-2 px-3 pr-8 min-h-[42px] cursor-pointer"
                     >
                       <option value="newest">Newest Arrivals</option>
                       <option value="price-low">Price: Low to High</option>
                       <option value="price-high">Price: High to Low</option>
                     </select>
                   </div>
-
-                  <p className="text-xs text-[#7B6D63] font-medium hidden lg:block font-sans">
-                    {sortedProducts.length} items
-                  </p>
                 </div>
+
               </div>
 
               {/* Active Filter Chips */}
               {activeFiltersCount > 0 && (
-                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#EFE8DC]/60">
-                  <span className="text-[12px] font-semibold uppercase tracking-wider text-[#B58E58] font-sans">Active:</span>
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#E8DDD2]">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#956638]">Active:</span>
 
                   {selectedCategory !== 'All' && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#2e0e43]/10 text-[#2e0e43] rounded-full text-xs font-medium">
-                      Category: {selectedCategory}
-                      <X size={12} className="cursor-pointer hover:scale-110" onClick={() => setSelectedCategory('All')} />
+                    <span className="badge-luxury">
+                      {selectedCategory}
+                      <X size={12} className="cursor-pointer hover:scale-110 ml-1" onClick={() => setSelectedCategory('All')} />
                     </span>
                   )}
 
                   {priceLimit < maxProductPrice && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#2e0e43]/10 text-[#2e0e43] rounded-full text-xs font-medium">
-                      Max: ₹{Number(priceLimit).toLocaleString()}
-                      <X size={12} className="cursor-pointer hover:scale-110" onClick={() => setPriceLimit(maxProductPrice)} />
+                    <span className="badge-luxury">
+                      Under ₹{Number(priceLimit).toLocaleString()}
+                      <X size={12} className="cursor-pointer hover:scale-110 ml-1" onClick={() => setPriceLimit(maxProductPrice)} />
                     </span>
                   )}
 
                   {selectedMaterials.map(mat => (
-                    <span key={mat} className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#2e0e43]/10 text-[#2e0e43] rounded-full text-xs font-medium">
+                    <span key={mat} className="badge-luxury">
                       {mat}
-                      <X size={12} className="cursor-pointer hover:scale-110" onClick={() => toggleMaterial(mat)} />
+                      <X size={12} className="cursor-pointer hover:scale-110 ml-1" onClick={() => toggleMaterial(mat)} />
                     </span>
                   ))}
 
                   {selectedTags.map(tag => (
-                    <span key={tag} className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#2e0e43] text-white rounded-full text-xs font-medium">
-                      Tag: {tag}
-                      <X size={12} className="cursor-pointer hover:scale-110" onClick={() => toggleTag(tag)} />
+                    <span key={tag} className="badge-luxury-dark text-xs py-1 px-3">
+                      {tag}
+                      <X size={12} className="cursor-pointer hover:scale-110 ml-1" onClick={() => toggleTag(tag)} />
                     </span>
                   ))}
 
                   {availability !== 'all' && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#2e0e43]/10 text-[#2e0e43] rounded-full text-xs font-medium">
+                    <span className="badge-luxury">
                       {availability === 'inStock' ? 'In Stock' : 'On Sale'}
-                      <X size={12} className="cursor-pointer hover:scale-110" onClick={() => setAvailability('all')} />
+                      <X size={12} className="cursor-pointer hover:scale-110 ml-1" onClick={() => setAvailability('all')} />
                     </span>
                   )}
 
                   {searchTerm && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#2e0e43]/10 text-[#2e0e43] rounded-full text-xs font-medium">
+                    <span className="badge-luxury">
                       "{searchTerm}"
-                      <X size={12} className="cursor-pointer hover:scale-110" onClick={() => setSearchTerm('')} />
+                      <X size={12} className="cursor-pointer hover:scale-110 ml-1" onClick={() => setSearchTerm('')} />
                     </span>
                   )}
 
                   <button
                     onClick={clearAllFilters}
-                    className="text-xs font-semibold text-[#2e0e43] underline hover:text-[#2A2623] ml-2 cursor-pointer"
+                    className="text-xs font-semibold text-[#956638] underline hover:text-[#211A16] ml-2 cursor-pointer"
                   >
                     Clear All
                   </button>
@@ -667,184 +627,119 @@ const Shop = () => {
               )}
             </div>
 
-            {/* Product Cards Grid */}
+            {/* ── Product Grid: Adaptive Responsive Layout ── */}
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
-                {[...Array(8)].map((_, i) => (
-                  <div key={i} className="animate-pulse bg-[#FFFDF9] rounded-2xl p-4 border border-[#EFE8DC]">
-                    <div className="aspect-square bg-[#F3ECE1] rounded-xl mb-3" />
-                    <div className="h-3 bg-[#F3ECE1] rounded w-3/4 mb-2" />
-                    <div className="h-3 bg-[#F3ECE1] rounded w-1/2" />
+              <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="card-luxury p-4 space-y-3 animate-pulse">
+                    <div className="aspect-square bg-[#F3ECE3] rounded-xl" />
+                    <div className="h-3 bg-[#F3ECE3] rounded w-3/4" />
+                    <div className="h-3 bg-[#F3ECE3] rounded w-1/2" />
                   </div>
                 ))}
               </div>
-            ) : sortedProducts.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
-                {sortedProducts.map((product, index) => {
-                  const inWishlist = isInWishlist ? isInWishlist(product.id) : false;
-                  const isSoldOut = product.stock <= 0;
-
-                  return (
-                    <motion.div
-                      key={product.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: (index % 4) * 0.05 }}
-                      className="group flex flex-col h-full rounded-2xl border border-[#E8DDD2]/90 bg-[#FFFDF9] overflow-hidden shadow-[0_4px_18px_rgba(33,26,22,0.06)] hover:shadow-[0_20px_38px_-6px_rgba(33,26,22,0.18)] hover:-translate-y-2.5 hover:scale-[1.015] hover:border-[#8C6239]/50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer will-change-transform"
-                      onClick={() => navigate(`/product/${product.id}`)}
-                    >
-                      {/* Image Box */}
-                      <div className="relative aspect-square w-full overflow-hidden bg-[#FAF6F0] border-b border-[#EBE3D7]/60">
-                        {(() => {
-                          const rawImg = product.image || product.images?.[0] || 'img/jewellery/j.png';
-                          return (
-                            <img
-                              src={getOptimizedImageUrl(rawImg)}
-                              alt={product.name}
-                              loading="lazy"
-                              decoding="async"
-                              onError={(e) => handleImageError(e, rawImg)}
-                              className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-                            />
-                          );
-                        })()}
-
-                        {/* Badges */}
-                        <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
-                          {product.original_price > product.price && (
-                            <span className="bg-[#2e0e43] text-white text-[11px] font-semibold tracking-[0.18em] uppercase px-2.5 py-1 rounded-sm shadow-sm">
-                              -{Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
-                            </span>
-                          )}
-                          {isSoldOut && (
-                            <span className="bg-[#2A2623] text-white text-[11px] font-semibold tracking-[0.18em] uppercase px-2.5 py-1 rounded-sm shadow-sm">
-                              SOLD OUT
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Wishlist Button */}
-                        <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <button
-                            onClick={(e) => handleAddToWishlist(e, product)}
-                            disabled={wishlistLoadings[product.id]}
-                            aria-label="Add to wishlist"
-                            className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-[#2A2623] hover:text-[#2e0e43] transition-all duration-300 border border-black/5 hover:scale-105 cursor-pointer"
-                          >
-                            {wishlistLoadings[product.id] ? (
-                              <Loader2 size={13} className="animate-spin" />
-                            ) : (
-                              <Heart size={14} fill={inWishlist ? '#2e0e43' : 'none'} stroke={inWishlist ? '#2e0e43' : 'currentColor'} strokeWidth={inWishlist ? 0 : 1.5} />
-                            )}
-                          </button>
-                        </div>
-
-                        {/* Slide-up Add to Cart Button */}
-                        {!isSoldOut && (
-                          <div className="absolute bottom-3 left-3 right-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10">
-                            <button
-                              onClick={(e) => handleAddToCart(e, product)}
-                              disabled={cartLoadings[product.id]}
-                              style={{ background: 'var(--btn-gradient)' }}
-                              className="w-full py-2.5 text-[11px] tracking-[0.2em] font-semibold uppercase flex items-center justify-center gap-2 rounded-lg text-white shadow-md hover:brightness-105 active:scale-95 transition-all duration-200 cursor-pointer"
-                            >
-                              {cartLoadings[product.id] ? (
-                                <Loader2 size={12} className="animate-spin" />
-                              ) : (
-                                <ShoppingBag size={12} />
-                              )}
-                              {isInCart(product.id) ? 'IN BAG' : 'ADD TO BAG'}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Product Metadata, Title & Pricing */}
-                      <div className="p-4 text-center space-y-1 flex flex-col justify-between flex-1">
-                        <div>
-                          <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-[#B58E58] font-sans block mb-1">
-                            {product.category || product.productType || "ZENZIES"}
-                          </span>
-
-                          <h3 className="text-xs md:text-sm font-normal text-[#2A2623] font-serif leading-snug group-hover:text-[#2e0e43] transition-colors duration-300 line-clamp-2">
-                            {product.name}
-                          </h3>
-                        </div>
-
-                        <div className="flex items-center justify-center gap-2 pt-2">
-                          <span className="text-sm font-bold text-[#2e0e43]">
-                            ₹{Number(product.price || 0).toLocaleString()}
-                          </span>
-                          {product.original_price && Number(product.original_price) > Number(product.price) && (
-                            <span className="text-xs text-[#999999] line-through font-normal">
-                              ₹{Number(product.original_price).toLocaleString()}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+            ) : sortedProducts.length === 0 ? (
+              /* Empty State */
+              <div className="card-luxury py-16 px-6 text-center max-w-lg mx-auto space-y-4">
+                <ShoppingBag size={36} strokeWidth={1.5} className="mx-auto text-[#956638]" />
+                <h3 className="font-serif text-2xl text-[#211A16] font-normal">No creations found</h3>
+                <p className="body-text text-sm sm:text-base text-[#6B5E52]">
+                  We couldn't find matching pieces with your current search or filter criteria.
+                </p>
+                <div className="pt-2">
+                  <button
+                    onClick={clearAllFilters}
+                    className="btn-luxury-primary"
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              </div>
+            ) : sortedProducts.length === 1 ? (
+              /* Adaptive 1-Product Layout (Balanced presentation, no 75% empty right side) */
+              <div className="max-w-[420px] mx-auto py-4">
+                <div className="mb-4 text-center">
+                  <span className="eyebrow-text block">Featured Piece</span>
+                  <p className="text-xs text-[#6B5E52] mt-0.5">Showing the single piece matching your criteria</p>
+                </div>
+                <ProductCard
+                  product={sortedProducts[0]}
+                  onAddToCartSuccess={handleAddToCartSuccess}
+                />
+              </div>
+            ) : sortedProducts.length === 2 ? (
+              /* Adaptive 2-Product Layout (Balanced 2-col presentation) */
+              <div className="grid grid-cols-1 sm:grid-cols-2 max-w-[840px] mx-auto gap-6 py-4">
+                {sortedProducts.map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    product={p}
+                    onAddToCartSuccess={handleAddToCartSuccess}
+                  />
+                ))}
               </div>
             ) : (
-              <div className="text-center py-20 bg-[#FFFDF9] rounded-2xl border border-[#EFE8DC] p-8 shadow-[0_4px_25px_rgba(0,0,0,0.02)]">
-                <ShoppingBag size={38} strokeWidth={1} className="mx-auto text-[#B58E58]/50 mb-3" />
-                <h3 className="font-serif text-2xl text-[#2A2623] mb-2 font-light">No matching products found</h3>
-                <p className="text-xs md:text-sm text-[#7B6D63] max-w-md mx-auto mb-6">Try clearing or adjusting your search filters to explore the rest of our collection.</p>
-                <button
-                  onClick={clearAllFilters}
-                  className="px-8 py-3 bg-[#2e0e43] text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-xl hover:bg-[#2A2623] transition-colors cursor-pointer"
-                >
-                  Clear All Filters
-                </button>
+              /* Standard 3-4 Column Luxury Grid */
+              <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
+                {sortedProducts.map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    product={p}
+                    onAddToCartSuccess={handleAddToCartSuccess}
+                  />
+                ))}
               </div>
             )}
+
           </div>
+
         </div>
       </div>
 
-      {/* Mobile Filter Drawer */}
+      {/* Mobile Drawer Filter */}
       <AnimatePresence>
         {showMobileFilters && (
-          <>
+          <div className="fixed inset-0 z-[200] lg:hidden">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowMobileFilters(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] lg:hidden"
+              className="absolute inset-0 bg-[#211A16]/70 backdrop-blur-sm"
             />
-            <motion.aside
+            <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed right-0 top-0 bottom-0 w-[85vw] max-w-sm bg-[#FFFDF9] z-[160] lg:hidden p-6 overflow-y-auto flex flex-col justify-between shadow-2xl"
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute top-0 right-0 bottom-0 w-[85%] max-w-sm bg-white p-6 overflow-y-auto shadow-2xl flex flex-col justify-between"
             >
-              <div className="space-y-6">
-                <div className="flex justify-between items-center pb-4 border-b border-[#EFE8DC]">
-                  <h3 className="font-serif text-xl font-semibold text-[#2A2623]">Filter Products</h3>
-                  <button onClick={() => setShowMobileFilters(false)} className="p-2 text-gray-400 hover:text-black cursor-pointer">
+              <div>
+                <div className="flex items-center justify-between pb-4 border-b border-[#E8DDD2] mb-6">
+                  <span className="font-serif text-xl text-[#211A16]">Filters</span>
+                  <button
+                    onClick={() => setShowMobileFilters(false)}
+                    className="p-1 text-[#6B5E52] hover:text-[#211A16]"
+                  >
                     <X size={20} />
                   </button>
                 </div>
                 <FilterSidebarContent />
               </div>
-              <div className="pt-6 border-t border-[#EFE8DC] mt-6">
+              <div className="pt-6 border-t border-[#E8DDD2] mt-6">
                 <button
                   onClick={() => setShowMobileFilters(false)}
-                  className="w-full py-3 bg-[#2e0e43] text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-xl shadow-md cursor-pointer"
+                  className="btn-luxury-primary w-full justify-center"
                 >
-                  Apply Filters ({sortedProducts.length})
+                  Show Results ({sortedProducts.length})
                 </button>
               </div>
-            </motion.aside>
-          </>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
-      {/* Add To Cart Confirmation & Quantity Modal */}
+      {/* Add To Cart Confirmation Popup Modal */}
       <AddToCartModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}

@@ -185,7 +185,7 @@ const TheEdit = () => {
                     background: banner1.btnBgColor && banner1.btnBgColor !== '#8C6239' ? banner1.btnBgColor : btnGradient,
                     color: banner1.btnTextColor || '#FFFFFF',
                   }}
-                  className="inline-flex items-center gap-2.5 px-6 sm:px-7 py-3 sm:py-3.5 rounded-[6px] text-xs sm:text-sm font-sans font-semibold tracking-wide shadow-md hover:brightness-105 hover:shadow-lg transition-all duration-200 active:scale-95 text-white"
+                  className="inline-flex items-center gap-2.5 px-6 sm:px-7 py-3.5 rounded-[8px] min-h-[48px] text-xs sm:text-sm font-body font-semibold tracking-wider uppercase shadow-md hover:brightness-105 hover:shadow-lg transition-all duration-200 active:scale-95 text-white"
                 >
                   <span>{banner1.btnText}</span>
                   <ArrowRight size={15} strokeWidth={2} />
@@ -249,7 +249,7 @@ const TheEdit = () => {
                     backgroundColor: banner2.btnBgColor,
                     color: banner2.btnTextColor,
                   }}
-                  className="inline-flex items-center gap-2.5 px-6 py-3 rounded-[4px] text-xs sm:text-sm font-sans font-semibold tracking-wide shadow-sm hover:brightness-95 hover:shadow-md transition-all duration-200"
+                  className="inline-flex items-center gap-2.5 px-6 sm:px-7 py-3.5 rounded-[8px] min-h-[48px] text-xs sm:text-sm font-body font-semibold tracking-wider uppercase shadow-md hover:brightness-105 hover:shadow-lg transition-all duration-200 active:scale-95"
                 >
                   <span>{banner2.btnText}</span>
                   <ArrowRight size={15} strokeWidth={2} />
