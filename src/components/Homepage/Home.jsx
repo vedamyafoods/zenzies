@@ -12,10 +12,12 @@ import BrandStory from './BrandStory';
 import TestimonialSection from './Testemonials';
 import SocialGallery from './SocialGallery';
 import Newsletter from '../Newsletter';
+import TryOnPromoBanner from '../VirtualTryOn/TryOnPromoBanner';
 
 const SECTION_COMPONENTS = {
   hero: Hero,
   category_grid: CategorySection,
+  try_on_banner: TryOnPromoBanner,
   jewellery_box_banner: FeaturedBoxBanner,
   bestsellers: BestSellers,
   trust_benefits: QualitySection,
@@ -29,14 +31,15 @@ const SECTION_COMPONENTS = {
 const DEFAULT_SECTION_ORDER = [
   { id: "hero", enabled: true, order: 1 },
   { id: "category_grid", enabled: true, order: 2 },
-  { id: "jewellery_box_banner", enabled: true, order: 3 },
-  { id: "bestsellers", enabled: true, order: 4 },
-  { id: "trust_benefits", enabled: true, order: 5 },
-  { id: "promotional_banners", enabled: true, order: 6 },
-  { id: "brand_story", enabled: true, order: 7 },
-  { id: "testimonials", enabled: true, order: 8 },
-  { id: "social_gallery", enabled: true, order: 9 },
-  { id: "newsletter", enabled: true, order: 10 },
+  { id: "try_on_banner", enabled: true, order: 3 },
+  { id: "jewellery_box_banner", enabled: true, order: 4 },
+  { id: "bestsellers", enabled: true, order: 5 },
+  { id: "trust_benefits", enabled: true, order: 6 },
+  { id: "promotional_banners", enabled: true, order: 7 },
+  { id: "brand_story", enabled: true, order: 8 },
+  { id: "testimonials", enabled: true, order: 9 },
+  { id: "social_gallery", enabled: true, order: 10 },
+  { id: "newsletter", enabled: true, order: 11 },
 ];
 
 function Home() {

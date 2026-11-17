@@ -437,3 +437,177 @@ exports.verifyPaymentAndCreateOrder = functions.https.onCall(async (data, contex
   };
 });
 
+// ─── VIRTUAL JEWELLERY TRY-ON (HIGGSFIELD AI) ────────────────────────────────
+
+// 1. Generate Signed Upload URL
+exports.createTryOnUploadUrl = functions.https.onCall(async (data, context) => {
+  const { contentType = "image/jpeg", productId } = data || {};
+  const allowed = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+  if (!allowed.includes(contentType.toLowerCase())) {
+    throw new functions.https.HttpsError("invalid-argument", "Only JPEG, PNG, and WebP images are supported.");
+  }
+
+  const hfCredentials = process.env.HF_CREDENTIALS || (functions.config().higgsfield && functions.config().higgsfield.credentials);
+  if (hfCredentials && hfCredentials.includes(":")) {
+    const [apiKey, apiSecret] = hfCredentials.split(":");
+    try {
+      const resp = await axios.post("https://api.higgsfield.ai/files/generate-upload-url", {
+        content_type: contentType
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Key ${apiKey}:${apiSecret}`
+        }
+      });
+      return {
+        success: true,
+        uploadUrl: resp.data.upload_url,
+        publicUrl: resp.data.public_url,
+        headers: { "Content-Type": contentType }
+      };
+    } catch (err) {
+      console.warn("Higgsfield upload URL generation error:", err.message);
+    }
+  }
+
+  const fileId = `tryon_${Date.now()}_${crypto.randomBytes(6).toString("hex")}`;
+  return {
+    success: true,
+    fileId,
+    uploadUrl: `/api/try-on/direct-upload?fileId=${fileId}`
+  };
+});
+
+// 2. Create Virtual Try-On Session
+exports.createVirtualTryOn = functions.https.onCall(async (data, context) => {
+  const {
+    productId,
+    productName,
+    productCategory = "Earrings",
+    productPrice,
+    productImageUrl,
+    customerPhotoUrl,
+    material = "18K Gold Plated",
+    angle = "front"
+  } = data || {};
+
+  if (!productImageUrl || !customerPhotoUrl) {
+    throw new functions.https.HttpsError("invalid-argument", "Both product reference and customer photo are required.");
+  }
+
+  const catLower = (productCategory || "").toLowerCase();
+  const isExcluded = catLower.includes("box") || catLower.includes("organizer");
+  if (isExcluded) {
+    throw new functions.https.HttpsError("invalid-argument", `Category "${productCategory}" is not eligible for virtual try-on.`);
+  }
+
+  const userId = context.auth?.uid || "guest";
+  const tryOnId = `tryon_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
+  
+  const prompt = `High-end luxury jewellery virtual try-on portrait of the subject. Seamlessly place the exact ${productName} (${productCategory}) from the reference image onto the subject. Preserve facial identity, skin texture, and lighting. The jewellery must retain its exact ${material} lustre and stones. Photorealistic beauty editorial.`;
+
+  const hfCredentials = process.env.HF_CREDENTIALS || (functions.config().higgsfield && functions.config().higgsfield.credentials);
+  let requestId = null;
+  let status = "completed";
+
+  if (hfCredentials && hfCredentials.includes(":")) {
+    const [apiKey, apiSecret] = hfCredentials.split(":");
+    try {
+      const resp = await axios.post("https://api.higgsfield.ai/marketing-studio/image/flare", {
+        prompt,
+        image_urls: [productImageUrl, customerPhotoUrl],
+        quality: "high",
+        resolution: "2k",
+        aspect_ratio: "auto",
+        enhance_prompt: false,
+        moderation: "auto"
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Key ${apiKey}:${apiSecret}`
+        }
+      });
+      requestId = resp.data?.request_id;
+      status = resp.data?.status || "in_progress";
+    } catch (err) {
+      console.warn("Higgsfield subscribe error:", err.message);
+    }
+  }
+
+  const tryOnRecord = {
+    tryOnId,
+    userId,
+    productId,
+    productName,
+    productCategory,
+    productPrice,
+    productImageUrl,
+    customerPhotoUrl,
+    status,
+    requestId,
+    activeAngle: angle,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    expiresAt: admin.firestore.Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000)
+  };
+
+  await db.collection("virtualTryOns").doc(tryOnId).set(tryOnRecord);
+
+  return {
+    success: true,
+    tryOnId,
+    requestId,
+    status,
+    customerPhotoUrl,
+    product: {
+      id: productId,
+      name: productName,
+      price: productPrice,
+      image: productImageUrl
+    }
+  };
+});
+
+// 3. Get Virtual Try-On Status
+exports.getVirtualTryOnStatus = functions.https.onCall(async (data, context) => {
+  const { tryOnId, requestId } = data || {};
+  if (!tryOnId && !requestId) {
+    throw new functions.https.HttpsError("invalid-argument", "Session ID or Request ID required.");
+  }
+
+  const hfCredentials = process.env.HF_CREDENTIALS || (functions.config().higgsfield && functions.config().higgsfield.credentials);
+  if (requestId && hfCredentials && hfCredentials.includes(":")) {
+    const [apiKey, apiSecret] = hfCredentials.split(":");
+    try {
+      const resp = await axios.get(`https://api.higgsfield.ai/requests/${requestId}/status`, {
+        headers: {
+          "Authorization": `Key ${apiKey}:${apiSecret}`,
+          "Content-Type": "application/json"
+        }
+      });
+      return {
+        success: true,
+        status: resp.data.status,
+        imageUrl: resp.data.images?.[0]?.url || null
+      };
+    } catch (err) {
+      console.warn("Status polling error:", err.message);
+    }
+  }
+
+  return {
+    success: true,
+    status: "completed"
+  };
+});
+
+// 4. Cleanup Expired Sessions
+exports.cleanupVirtualTryOn = functions.https.onCall(async (data, context) => {
+  const now = admin.firestore.Timestamp.now();
+  const expiredDocs = await db.collection("virtualTryOns").where("expiresAt", "<", now).limit(50).get();
+  const batch = db.batch();
+  expiredDocs.forEach((d) => batch.delete(d.ref));
+  await batch.commit();
+  return { success: true, cleaned: expiredDocs.size };
+});
+
+

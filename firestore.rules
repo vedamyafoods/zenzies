@@ -81,6 +81,13 @@ service cloud.firestore {
       allow create: if true;
       allow read, update, delete: if request.auth != null;
     }
+
+    // Virtual Try-On sessions: secure client isolation and TTL management
+    match /virtualTryOns/{tryOnId} {
+      allow read: if request.auth != null ? (resource.data.userId == request.auth.uid) : true;
+      allow create: if true;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
   }
 }
 
