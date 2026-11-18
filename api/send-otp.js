@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import { sendMailWithFallback } from "./utils/mailer.js";
-import { db, doc, getDoc, setDoc } from "./utils/firebaseServer.js";
+import { sendMailWithFallback } from "./_utils/mailer.js";
+import { db, doc, getDoc, setDoc } from "./_utils/firebaseServer.js";
 
 const normalizeEmail = (email) => {
   if (!email || typeof email !== "string") return "";

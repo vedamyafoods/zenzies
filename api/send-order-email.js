@@ -1,4 +1,4 @@
-import { sendMailWithFallback } from "./utils/mailer.js";
+import { sendMailWithFallback } from "./_utils/mailer.js";
 
 const formatItemsHtml = (items = []) => {
   if (!items || items.length === 0) {

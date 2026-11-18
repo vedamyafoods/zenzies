@@ -98,12 +98,14 @@ export default async function handler(req, res) {
     // ── LIVE HIGGSFIELD AI GENERATION MODE ────────────────────────────────
     if (hfCredentials && hfCredentials.includes(":")) {
       try {
-        const { config, higgsfield } = await import("@higgsfield/client/v2");
-        config({ credentials: hfCredentials });
-
-        // Submit initial Front View generation request
-        const hfResult = await higgsfield.subscribe("marketing-studio/image/flare", {
-          input: {
+        const [apiKey, apiSecret] = hfCredentials.split(":");
+        const hfResp = await fetch("https://api.higgsfield.ai/marketing-studio/image/flare", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Key ${apiKey}:${apiSecret}`
+          },
+          body: JSON.stringify({
             prompt: prompts[angle] || prompts.front,
             image_urls: [productImageUrl, customerPhotoUrl],
             quality: "high",
@@ -111,33 +113,51 @@ export default async function handler(req, res) {
             aspect_ratio: "auto",
             enhance_prompt: false,
             moderation: "auto"
-          },
-          withPolling: false // Return request_id for honest asynchronous stage tracking
+          })
         });
 
-        const requestId = hfResult.request_id || `hf_${Date.now()}`;
-        const initialStatus = hfResult.status || "in_progress";
+        if (hfResp.ok) {
+          const hfResult = await hfResp.json();
+          const requestId = hfResult.request_id || `hf_${Date.now()}`;
+          const initialStatus = hfResult.status || "in_progress";
 
-        return res.status(200).json({
-          success: true,
-          mode: "live",
-          tryOnId,
-          requestId,
-          status: initialStatus,
-          activeAngle: angle,
-          prompts,
-          angles: {
-            front: {
-              status: angle === "front" ? initialStatus : "pending",
-              requestId: angle === "front" ? requestId : null,
-              imageUrl: hfResult.images?.[0]?.url || null
+          return res.status(200).json({
+            success: true,
+            mode: "live",
+            tryOnId,
+            requestId,
+            status: initialStatus,
+            activeAngle: angle,
+            prompts,
+            angles: {
+              front: {
+                status: angle === "front" ? initialStatus : "pending",
+                requestId: angle === "front" ? requestId : null,
+                imageUrl: hfResult.images?.[0]?.url || null
+              },
+              left: { status: "pending", requestId: null, imageUrl: null },
+              right: { status: "pending", requestId: null, imageUrl: null },
+              closeup: { status: "pending", requestId: null, imageUrl: null }
             },
-            left: { status: "pending", requestId: null, imageUrl: null },
-            right: { status: "pending", requestId: null, imageUrl: null },
-            closeup: { status: "pending", requestId: null, imageUrl: null }
-          },
-          product: {
-            id: productId,
+            product: {
+              id: productId,
+              name: productName,
+              category: productCategory,
+              price: productPrice,
+              image: productImageUrl
+            },
+            customerPhotoUrl,
+            createdAt: new Date().toISOString()
+          });
+        } else {
+          const errText = await hfResp.text();
+          console.warn("[Try-On API] Higgsfield HTTP warning:", hfResp.status, errText);
+        }
+      } catch (hfError) {
+        console.error("[Try-On API] Higgsfield execution error:", hfError.message);
+        // If API fails due to rate limits or balance, fall through to high-fidelity simulation
+      }
+    }
             name: productName,
             category: productCategory,
             price: productPrice,

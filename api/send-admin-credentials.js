@@ -1,4 +1,4 @@
-import { sendMailWithFallback } from "./utils/mailer.js";
+import { sendMailWithFallback } from "./_utils/mailer.js";
 
 const normalizeEmail = (email) => {
   if (!email || typeof email !== "string") return "";

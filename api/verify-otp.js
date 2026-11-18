@@ -9,7 +9,7 @@ import {
   query, 
   where, 
   getDocs 
-} from "./utils/firebaseServer.js";
+} from "./_utils/firebaseServer.js";
 
 const normalizeEmail = (email) => {
   if (!email || typeof email !== "string") return "";
