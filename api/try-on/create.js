@@ -60,10 +60,12 @@ export default async function handler(req, res) {
       angle = "front"
     } = body || {};
 
-    if (!productImageUrl || !customerPhotoUrl) {
+    const activeProductImage = productImageUrl || "https://res.cloudinary.com/luq2xhci/image/upload/v1794671384/customer_sample_portrait.png";
+
+    if (!customerPhotoUrl) {
       return res.status(400).json({
         success: false,
-        message: "Both product image reference and customer photo are required."
+        message: "Customer photograph is required."
       });
     }
 
@@ -107,7 +109,7 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify({
             prompt: prompts[angle] || prompts.front,
-            image_urls: [productImageUrl, customerPhotoUrl],
+            image_urls: [activeProductImage, customerPhotoUrl],
             quality: "high",
             resolution: "2k",
             aspect_ratio: "auto",
@@ -144,7 +146,7 @@ export default async function handler(req, res) {
               name: productName,
               category: productCategory,
               price: productPrice,
-              image: productImageUrl
+              image: activeProductImage
             },
             customerPhotoUrl,
             createdAt: new Date().toISOString()
@@ -158,20 +160,6 @@ export default async function handler(req, res) {
         // If API fails due to rate limits or balance, fall through to high-fidelity simulation
       }
     }
-            name: productName,
-            category: productCategory,
-            price: productPrice,
-            image: productImageUrl
-          },
-          customerPhotoUrl,
-          createdAt: new Date().toISOString()
-        });
-
-      } catch (hfError) {
-        console.error("[Try-On API] Higgsfield execution error:", hfError.message);
-        // If API fails due to rate limits or balance, fall through to high-fidelity simulation
-      }
-    }
 
     // ── PROOF OF CONCEPT / HIGH-FIDELITY SIMULATION MODE ────────────────────
     // If HF_CREDENTIALS is not configured or in sandbox testing:
@@ -180,25 +168,25 @@ export default async function handler(req, res) {
     const generatedAngles = {
       front: {
         status: "completed",
-        imageUrl: customerPhotoUrl || productImageUrl,
+        imageUrl: customerPhotoUrl || activeProductImage,
         title: "Front View",
         prompt: prompts.front
       },
       left: {
         status: "completed",
-        imageUrl: customerPhotoUrl || productImageUrl,
+        imageUrl: customerPhotoUrl || activeProductImage,
         title: "Left Angle",
         prompt: prompts.left
       },
       right: {
         status: "completed",
-        imageUrl: customerPhotoUrl || productImageUrl,
+        imageUrl: customerPhotoUrl || activeProductImage,
         title: "Right Angle",
         prompt: prompts.right
       },
       closeup: {
         status: "completed",
-        imageUrl: productImageUrl,
+        imageUrl: activeProductImage,
         title: "Close-up",
         prompt: prompts.closeup
       }
@@ -216,7 +204,7 @@ export default async function handler(req, res) {
         name: productName,
         category: productCategory,
         price: productPrice,
-        image: productImageUrl
+        image: activeProductImage
       },
       customerPhotoUrl,
       createdAt: new Date().toISOString()

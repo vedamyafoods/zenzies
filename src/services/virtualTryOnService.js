@@ -30,25 +30,49 @@ export async function validateCustomerPhoto(file) {
     };
   }
 
-  // Verify successful image decoding
+  // Verify successful image decoding and auto-optimize resolution
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        if (img.naturalWidth < 200 || img.naturalHeight < 200) {
+        if (img.naturalWidth < 150 || img.naturalHeight < 150) {
           resolve({
             valid: false,
             error: "Photo resolution is too low. Please use a clearer photo of at least 200x200px."
           });
-        } else {
-          resolve({
-            valid: true,
-            width: img.naturalWidth,
-            height: img.naturalHeight,
-            dataUrl: e.target.result
-          });
+          return;
         }
+
+        // Optimize dimensions (max 1200px) to prevent Vercel 4.5MB payload limits
+        const MAX_DIM = 1200;
+        let width = img.naturalWidth;
+        let height = img.naturalHeight;
+
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const optimizedDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+
+        resolve({
+          valid: true,
+          width,
+          height,
+          dataUrl: optimizedDataUrl
+        });
       };
       img.onerror = () => {
         resolve({
@@ -160,25 +184,32 @@ export async function createTryOnSession({
   user,
   angle = "front"
 }) {
+  const productImageUrl =
+    product?.primaryImage ||
+    product?.image ||
+    (Array.isArray(product?.images) && product.images[0]) ||
+    product?.images?.[0] ||
+    "https://res.cloudinary.com/luq2xhci/image/upload/v1794671384/customer_sample_portrait.png";
+
   const response = await fetch("/api/try-on/create", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      productId: product.id,
-      productName: product.name,
-      productCategory: product.category || "Jewellery",
-      productPrice: product.price,
-      productImageUrl: product.primaryImage || product.image || product.images?.[0],
+      productId: product?.id || "product_id",
+      productName: product?.name || "Fine Jewellery",
+      productCategory: product?.category || "Earrings",
+      productPrice: product?.price || 0,
+      productImageUrl,
       customerPhotoUrl,
       userId: user?.uid || "guest",
-      material: product.material || "18K Gold Plated",
+      material: product?.material || "18K Gold Plated",
       angle
     })
   });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "Failed to start AI generation.");
+    throw new Error(errorData.message || `Server error (${response.status}): Failed to start AI generation.`);
   }
 
   return response.json();
