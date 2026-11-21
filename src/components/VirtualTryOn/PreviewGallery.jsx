@@ -20,10 +20,11 @@ const PreviewGallery = ({
 
   // Active image calculation
   const currentAngleData = angles[activeAngle] || angles.front || {};
+  const aiGeneratedUrl = currentAngleData.imageUrl || angles.front?.imageUrl;
   const activeImageUrl =
     comparisonMode === "before"
       ? customerPhoto?.dataUrl
-      : currentAngleData.imageUrl || customerPhoto?.dataUrl;
+      : aiGeneratedUrl || customerPhoto?.dataUrl;
 
   return (
     <div className="space-y-4">

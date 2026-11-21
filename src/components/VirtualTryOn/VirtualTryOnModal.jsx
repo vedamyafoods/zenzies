@@ -86,15 +86,15 @@ const VirtualTryOnModal = ({ isOpen, onClose, product }) => {
       });
 
       // 3. Track progress or handle completed results
-      if (sessionResult.mode === "simulation" || sessionResult.status === "completed") {
+      if (sessionResult.status === "completed" && sessionResult.imageUrl) {
         setProgressState({
           stage: "Finalizing your results...",
           progressPercent: 100
         });
-        setTimeout(() => {
-          setGeneratedAngles(sessionResult.angles || {});
-          setStep("results");
-        }, 1200);
+        setGeneratedAngles(sessionResult.angles || {
+          front: { status: "completed", imageUrl: sessionResult.imageUrl }
+        });
+        setStep("results");
       } else {
         // Asynchronous polling
         setProgressState({
@@ -108,8 +108,13 @@ const VirtualTryOnModal = ({ isOpen, onClose, product }) => {
           (progress) => setProgressState(progress)
         );
 
+        const finalUrl = completedStatus.imageUrl || completedStatus.angles?.front?.imageUrl;
+        if (!finalUrl) {
+          throw new Error("AI did not return a preview image. Please retry with a clearer photo.");
+        }
+
         setGeneratedAngles(completedStatus.angles || {
-          front: { status: "completed", imageUrl: completedStatus.imageUrl }
+          front: { status: "completed", imageUrl: finalUrl }
         });
         setStep("results");
       }

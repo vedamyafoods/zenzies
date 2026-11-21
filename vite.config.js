@@ -13,16 +13,14 @@ function apiDevServerPlugin(env) {
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         if (req.url && req.url.startsWith('/api/')) {
-          const urlPath = req.url.split('?')[0];
-          const relativePath = urlPath.replace(/^\/api\//, '');
+          const parsedUrl = new URL(req.url, 'http://localhost');
+          req.query = Object.fromEntries(parsedUrl.searchParams.entries());
+          const relativePath = parsedUrl.pathname.replace(/^\/api\//, '');
           const jsFilePath = path.resolve(process.cwd(), 'api', `${relativePath}.js`);
 
           if (fs.existsSync(jsFilePath)) {
             try {
-              let rawBody = '';
-              req.on('data', chunk => { rawBody += chunk; });
-              req.on('end', async () => {
-                req.body = rawBody;
+              const runHandler = async () => {
                 if (!res.json) {
                   res.json = (data) => {
                     res.setHeader('Content-Type', 'application/json');
@@ -45,6 +43,18 @@ function apiDevServerPlugin(env) {
                     res.status(500).json({ error: handlerErr.message });
                   }
                 }
+              };
+
+              if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
+                await runHandler();
+                return;
+              }
+
+              let rawBody = '';
+              req.on('data', chunk => { rawBody += chunk; });
+              req.on('end', async () => {
+                req.body = rawBody;
+                await runHandler();
               });
               return;
             } catch (err) {

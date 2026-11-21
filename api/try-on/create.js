@@ -1,4 +1,7 @@
+import "dotenv/config";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
 /**
  * Builds the exact jewellery preservation prompt specified by Zenzies
@@ -10,20 +13,10 @@ function buildJewelleryTryOnPrompt(productName, category = "Earrings", material 
   let itemPlacement = "Place the exact original earring naturally on the person's visible ear. Correctly align the earring with the earlobe and piercing position. Follow gravity and natural hanging direction.";
   let perspectiveFocus = "Direct front-facing portrait showing both ears and the exact jewellery piece prominently and symmetrically visible.";
 
-  if (cat.includes("necklace") || cat.includes("pendant")) {
-    itemNoun = "necklace";
-    itemPlacement = "Place the exact original necklace resting elegantly around the neck, draped naturally against the collarbone.";
-    perspectiveFocus = "Front-facing portrait showing the necklace resting naturally on the collarbone.";
-  } else if (cat.includes("ring")) {
-    itemNoun = "ring";
-    itemPlacement = "Place the exact original ring naturally and comfortably worn on the person's finger.";
-    perspectiveFocus = "Natural portrait featuring the hand and finger adorned with the exact ring.";
-  } else if (cat.includes("bracelet") || cat.includes("bangle")) {
-    itemNoun = "bracelet";
-    itemPlacement = "Place the exact original bracelet naturally fitted around the person's wrist.";
-    perspectiveFocus = "Natural portrait featuring the wrist adorned with the exact bracelet.";
-  } else {
-    // Earrings by default
+  // Categorize carefully: earrings check FIRST to prevent "earrings".includes("ring") collision!
+  if (cat.includes("earring") || cat.includes("jhumka") || cat.includes("stud") || cat.includes("hoop") || cat.includes("drop")) {
+    itemNoun = "earring";
+    itemPlacement = "Place the exact original earring naturally on the person's visible ear. Correctly align the earring with the earlobe and piercing position. Follow gravity and natural hanging direction.";
     if (angle === "left") {
       perspectiveFocus = "Gentle three-quarter left angle portrait showcasing the side profile and highlighting the exact earring worn on the left ear.";
     } else if (angle === "right") {
@@ -31,6 +24,18 @@ function buildJewelleryTryOnPrompt(productName, category = "Earrings", material 
     } else if (angle === "closeup") {
       perspectiveFocus = "Macro close-up beauty portrait focusing directly on the exact earring, fine surface texture, and realistic skin contact.";
     }
+  } else if (cat.includes("necklace") || cat.includes("pendant") || cat.includes("choker") || cat.includes("chain")) {
+    itemNoun = "necklace";
+    itemPlacement = "Place the exact original necklace resting elegantly around the neck, draped naturally against the collarbone.";
+    perspectiveFocus = "Front-facing portrait showing the necklace resting naturally on the collarbone.";
+  } else if (cat.includes("bracelet") || cat.includes("bangle") || cat.includes("cuff")) {
+    itemNoun = "bracelet";
+    itemPlacement = "Place the exact original bracelet naturally fitted around the person's wrist.";
+    perspectiveFocus = "Natural portrait featuring the wrist adorned with the exact bracelet.";
+  } else if (cat.includes("ring") || cat.includes("band")) {
+    itemNoun = "ring";
+    itemPlacement = "Place the exact original ring naturally and comfortably worn on the person's finger.";
+    perspectiveFocus = "Natural portrait featuring the hand and finger adorned with the exact ring.";
   }
 
   return `# ZENZIES – EXACT JEWELLERY PRESERVATION & VIRTUAL TRY-ON
@@ -111,10 +116,10 @@ If perfect jewellery preservation conflicts with visual enhancement, ALWAYS prio
 }
 
 /**
- * Ensures an image (product or customer) is hosted on Higgsfield CloudFront CDN
- * to prevent external ingestion failures.
+ * Ensures an image (local relative path, base64 data URL, or remote URL)
+ * is hosted on Higgsfield CloudFront CDN for reliable generation.
  */
-async function ensureHiggsfieldUrl(imageUrl, apiKey, apiSecret) {
+async function ensureHiggsfieldUrl(imageUrl, apiKey, apiSecret, req) {
   if (!imageUrl) return null;
   if (typeof imageUrl === "string" && imageUrl.includes("cloudfront.net")) {
     return imageUrl;
@@ -132,10 +137,30 @@ async function ensureHiggsfieldUrl(imageUrl, apiKey, apiSecret) {
       } else {
         return imageUrl;
       }
+    } else if (imageUrl.startsWith("/")) {
+      // Local file in public/ directory
+      const localFilePath = path.join(process.cwd(), "public", imageUrl);
+      if (fs.existsSync(localFilePath)) {
+        buf = fs.readFileSync(localFilePath);
+        if (imageUrl.endsWith(".png")) contentType = "image/png";
+        else if (imageUrl.endsWith(".webp")) contentType = "image/webp";
+        else contentType = "image/jpeg";
+      } else {
+        // Fallback to absolute URL if hosted on Vercel
+        const host = req?.headers?.["x-forwarded-host"] || req?.headers?.host || "localhost:5173";
+        const proto = req?.headers?.["x-forwarded-proto"] || "https";
+        const fullUrl = `${proto}://${host}${imageUrl}`;
+        const imgRes = await fetch(fullUrl);
+        if (!imgRes.ok) return imageUrl;
+        contentType = imgRes.headers.get("content-type") || "image/jpeg";
+        buf = Buffer.from(await imgRes.arrayBuffer());
+      }
     } else {
+      // Remote HTTP/HTTPS URL
       const imgRes = await fetch(imageUrl);
       if (!imgRes.ok) return imageUrl;
       contentType = imgRes.headers.get("content-type") || "image/jpeg";
+      if (!contentType.startsWith("image/")) contentType = "image/jpeg";
       buf = Buffer.from(await imgRes.arrayBuffer());
     }
 
@@ -194,7 +219,7 @@ export default async function handler(req, res) {
 
     const {
       productId,
-      productName = "Zenzies Fine Jewellery",
+      productName = "Fine Jewellery",
       productCategory = "Earrings",
       productPrice,
       productImageUrl,
@@ -204,7 +229,7 @@ export default async function handler(req, res) {
       angle = "front"
     } = body || {};
 
-    const rawProductImage = productImageUrl || "https://res.cloudinary.com/luq2xhci/image/upload/v1794671384/customer_sample_portrait.png";
+    const rawProductImage = productImageUrl || "/img/zenzies/products/bestseller_earrings.png";
 
     if (!customerPhotoUrl) {
       return res.status(400).json({
@@ -236,93 +261,73 @@ export default async function handler(req, res) {
       });
     }
 
-    const tryOnId = `tryon_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
-    const prompt = buildJewelleryTryOnPrompt(productName, productCategory, material, angle);
     const hfCredentials = process.env.HF_CREDENTIALS;
 
-    // ── LIVE HIGGSFIELD AI GENERATION ────────────────────────────────────
-    if (hfCredentials && hfCredentials.includes(":")) {
-      const [apiKey, apiSecret] = hfCredentials.split(":");
-
-      // Ensure both images are hosted on Higgsfield CloudFront CDN
-      const [validCustomerUrl, validProductUrl] = await Promise.all([
-        ensureHiggsfieldUrl(customerPhotoUrl, apiKey, apiSecret),
-        ensureHiggsfieldUrl(rawProductImage, apiKey, apiSecret)
-      ]);
-
-      const hfResp = await fetch("https://api.higgsfield.ai/marketing-studio/image", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Key ${apiKey}:${apiSecret}`
-        },
-        body: JSON.stringify({
-          prompt,
-          image_urls: [validCustomerUrl, validProductUrl],
-          quality: "high",
-          resolution: "2k",
-          aspect_ratio: "auto",
-          enhance_prompt: false,
-          moderation: "auto"
-        })
+    if (!hfCredentials || !hfCredentials.includes(":")) {
+      return res.status(500).json({
+        success: false,
+        message: "Virtual try-on requires HF_CREDENTIALS to be configured in your environment or Vercel dashboard."
       });
-
-      if (hfResp.ok) {
-        const hfResult = await hfResp.json();
-        const requestId = hfResult.request_id || `hf_${Date.now()}`;
-        const initialStatus = hfResult.status || "in_progress";
-
-        return res.status(200).json({
-          success: true,
-          mode: "live",
-          tryOnId,
-          requestId,
-          status: initialStatus,
-          activeAngle: angle,
-          prompt,
-          customerPhotoUrl: validCustomerUrl,
-          product: {
-            id: productId,
-            name: productName,
-            category: productCategory,
-            price: productPrice,
-            image: validProductUrl
-          },
-          createdAt: new Date().toISOString()
-        });
-      } else {
-        const errText = await hfResp.text();
-        console.error("[Try-On API] Higgsfield error:", hfResp.status, errText);
-        return res.status(502).json({
-          success: false,
-          message: `AI try-on engine returned error (${hfResp.status}). Please try again shortly.`
-        });
-      }
     }
 
-    // ── FALLBACK FOR LOCAL DEV WITHOUT CREDENTIALS ───────────────────────
-    return res.status(200).json({
-      success: true,
-      mode: "simulation",
-      tryOnId,
-      status: "completed",
-      activeAngle: angle,
-      customerPhotoUrl,
-      angles: {
-        front: { status: "completed", imageUrl: customerPhotoUrl },
-        left: { status: "completed", imageUrl: customerPhotoUrl },
-        right: { status: "completed", imageUrl: customerPhotoUrl },
-        closeup: { status: "completed", imageUrl: customerPhotoUrl }
+    const [apiKey, apiSecret] = hfCredentials.split(":");
+    const tryOnId = `tryon_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
+    const prompt = buildJewelleryTryOnPrompt(productName, productCategory, material, angle);
+
+    // Ensure both customer and product images are hosted on Higgsfield CloudFront CDN
+    const [validCustomerUrl, validProductUrl] = await Promise.all([
+      ensureHiggsfieldUrl(customerPhotoUrl, apiKey, apiSecret, req),
+      ensureHiggsfieldUrl(rawProductImage, apiKey, apiSecret, req)
+    ]);
+
+    const hfResp = await fetch("https://api.higgsfield.ai/marketing-studio/image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Key ${apiKey}:${apiSecret}`
       },
-      product: {
-        id: productId,
-        name: productName,
-        category: productCategory,
-        price: productPrice,
-        image: rawProductImage
-      },
-      createdAt: new Date().toISOString()
+      body: JSON.stringify({
+        prompt,
+        image_urls: [validCustomerUrl, validProductUrl],
+        quality: "high",
+        resolution: "2k",
+        aspect_ratio: "auto",
+        enhance_prompt: false,
+        moderation: "auto"
+      })
     });
+
+    if (hfResp.ok) {
+      const hfResult = await hfResp.json();
+      const requestId = hfResult.request_id || `hf_${Date.now()}`;
+      const initialStatus = hfResult.status || "in_progress";
+
+      return res.status(200).json({
+        success: true,
+        mode: "live",
+        tryOnId,
+        requestId,
+        status: initialStatus,
+        activeAngle: angle,
+        prompt,
+        customerPhotoUrl: validCustomerUrl,
+        product: {
+          id: productId,
+          name: productName,
+          category: productCategory,
+          price: productPrice,
+          image: validProductUrl
+        },
+        createdAt: new Date().toISOString()
+      });
+    } else {
+      const errText = await hfResp.text();
+      console.error("[Try-On API] Higgsfield error:", hfResp.status, errText);
+      return res.status(502).json({
+        success: false,
+        message: `AI try-on engine returned error (${hfResp.status}). Please try again shortly.`
+      });
+    }
 
   } catch (error) {
     console.error("[Try-On API] create error:", error);
