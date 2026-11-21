@@ -56,8 +56,9 @@ export default async function handler(req, res) {
             provider: "higgsfield",
             uploadUrl: data.upload_url,
             publicUrl: data.public_url,
-            headers: {
-              "Content-Type": contentType
+            headers: data.upload_headers || {
+              "Content-Type": contentType,
+              "x-amz-tagging": "retention=temporary"
             }
           });
         }

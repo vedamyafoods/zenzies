@@ -33,13 +33,25 @@ export default async function handler(req, res) {
       if (response.ok) {
         const data = await response.json();
         // data has: status ('queued' | 'in_progress' | 'completed' | 'failed' | 'nsfw'), images: [{ url }]
+        const generatedImage = data.images?.[0]?.url || null;
+
         return res.status(200).json({
-          success: true,
+          success: data.status !== "failed" && data.status !== "nsfw",
           status: data.status,
           requestId: data.request_id || requestId,
-          imageUrl: data.images?.[0]?.url || null,
+          imageUrl: generatedImage,
+          angles: {
+            [angle]: {
+              status: data.status,
+              imageUrl: generatedImage
+            },
+            front: {
+              status: data.status,
+              imageUrl: generatedImage
+            }
+          },
           videoUrl: data.video?.url || null,
-          error: data.error || null
+          error: data.error || (data.status === "failed" ? "AI image placement could not complete for this photo." : null)
         });
       } else {
         const errText = await response.text();
@@ -63,4 +75,3 @@ export default async function handler(req, res) {
     });
   }
 }
-

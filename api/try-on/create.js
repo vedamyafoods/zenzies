@@ -1,28 +1,172 @@
 import crypto from "crypto";
 
-// Category Prompt Builder
-function buildAnglePrompts(productName, category, material = "gold") {
+/**
+ * Builds the exact jewellery preservation prompt specified by Zenzies
+ */
+function buildJewelleryTryOnPrompt(productName, category = "Earrings", material = "18K Gold Plated", angle = "front") {
   const cat = (category || "").toLowerCase();
 
-  let itemPlacement = "worn naturally";
-  if (cat.includes("earring")) {
-    itemPlacement = "hanging gracefully from the visible earlobes";
-  } else if (cat.includes("necklace") || cat.includes("pendant")) {
-    itemPlacement = "resting elegantly around the neck, draped naturally against the collarbone";
+  let itemNoun = "earring";
+  let itemPlacement = "Place the exact original earring naturally on the person's visible ear. Correctly align the earring with the earlobe and piercing position. Follow gravity and natural hanging direction.";
+  let perspectiveFocus = "Direct front-facing portrait showing both ears and the exact jewellery piece prominently and symmetrically visible.";
+
+  if (cat.includes("necklace") || cat.includes("pendant")) {
+    itemNoun = "necklace";
+    itemPlacement = "Place the exact original necklace resting elegantly around the neck, draped naturally against the collarbone.";
+    perspectiveFocus = "Front-facing portrait showing the necklace resting naturally on the collarbone.";
   } else if (cat.includes("ring")) {
-    itemPlacement = "adorned comfortably on the finger";
+    itemNoun = "ring";
+    itemPlacement = "Place the exact original ring naturally and comfortably worn on the person's finger.";
+    perspectiveFocus = "Natural portrait featuring the hand and finger adorned with the exact ring.";
   } else if (cat.includes("bracelet") || cat.includes("bangle")) {
-    itemPlacement = "fitted elegantly around the wrist";
+    itemNoun = "bracelet";
+    itemPlacement = "Place the exact original bracelet naturally fitted around the person's wrist.";
+    perspectiveFocus = "Natural portrait featuring the wrist adorned with the exact bracelet.";
+  } else {
+    // Earrings by default
+    if (angle === "left") {
+      perspectiveFocus = "Gentle three-quarter left angle portrait showcasing the side profile and highlighting the exact earring worn on the left ear.";
+    } else if (angle === "right") {
+      perspectiveFocus = "Gentle three-quarter right angle portrait showcasing the side profile and highlighting the exact earring worn on the right ear.";
+    } else if (angle === "closeup") {
+      perspectiveFocus = "Macro close-up beauty portrait focusing directly on the exact earring, fine surface texture, and realistic skin contact.";
+    }
   }
 
-  const baseInstructions = `High-end luxury jewellery virtual try-on portrait of the subject. Seamlessly place the exact ${productName} (${category}) from the reference jewellery image ${itemPlacement}. Strictly preserve the subject's facial identity, skin texture, lighting, and natural expression. The jewellery must retain its exact ${material} lustre, stones, pearls, and handcrafted atelier details. Photorealistic commercial beauty editorial.`;
+  return `# ZENZIES – EXACT JEWELLERY PRESERVATION & VIRTUAL TRY-ON
 
-  return {
-    front: `${baseInstructions} Direct front-facing portrait with both ears and jewellery prominently and symmetrically visible.`,
-    left: `${baseInstructions} Gentle three-quarter left angle portrait showcasing the side profile and highlighting the piece on the left.`,
-    right: `${baseInstructions} Gentle three-quarter right angle portrait showcasing the side profile and highlighting the piece on the right.`,
-    closeup: `${baseInstructions} Macro close-up beauty portrait focusing directly on the jewellery piece, delicate skin interaction, and high-definition specular reflections.`
-  };
+## ROLE
+You are a professional luxury jewellery virtual try-on image editing AI. Your task is to realistically place the EXACT jewellery product from the provided reference image onto the person in the provided customer photograph.
+
+## INPUT IMAGES
+- IMAGE 1: Original customer photograph (the person who will wear the jewellery).
+- IMAGE 2: Original Zenzies jewellery product photograph (the exact ${itemNoun} that must be worn: ${productName}).
+
+## MOST IMPORTANT RULE: 100% JEWELLERY DESIGN PRESERVATION
+The jewellery in IMAGE 2 is a real product and must be treated as a locked, immutable reference.
+DO NOT redesign, recreate, reinterpret, simplify, beautify, modify or generate a similar-looking ${itemNoun}.
+Preserve the original jewellery with maximum possible visual fidelity.
+
+The following details MUST remain identical to the reference product:
+1. Exact original ${itemNoun} silhouette, shape and dimensions.
+2. Every individual crystal, diamond, gemstone and stone.
+3. Exact number, size, shape and arrangement of all crystals.
+4. Original stone colours, transparency, reflections and sparkle.
+5. Exact metal colour (${material}), finish, texture and material.
+6. Original pearls, beads, chains, hooks and decorative elements.
+7. Every tiny connecting component and structural detail.
+8. Original symmetry, proportions and overall construction.
+9. Original hanging parts, curves, edges and design patterns.
+
+NEVER add, remove, replace, duplicate or rearrange any crystal, stone, pearl or decorative element.
+
+## CUSTOMER PHOTO PRESERVATION
+Preserve the customer's original identity and appearance.
+- Keep the same face, facial features, skin tone and skin texture.
+- Preserve the original hairstyle, hair colour and ear shape.
+- Do not change the person's age, expression or facial structure.
+- Do not beautify, retouch or regenerate the person's face.
+- Keep the original photograph's background, lighting and composition wherever possible.
+
+## REALISTIC JEWELLERY PLACEMENT
+${itemPlacement}
+- Maintain realistic size and natural proportions.
+- Reproduce realistic shadows, reflections and light interaction.
+- Ensure the jewellery does not float, penetrate the skin or appear pasted on.
+- Preserve realistic contact between the jewellery and skin.
+- If hair overlaps the jewellery, maintain natural foreground and background layering.
+
+## IMAGE QUALITY & PERSPECTIVE
+Produce a photorealistic luxury jewellery campaign-quality image.
+- Perspective: ${perspectiveFocus}
+- High-resolution output.
+- Natural skin texture.
+- Sharp, clearly visible jewellery details.
+- Realistic crystal reflections and metallic highlights.
+- Professional fashion photography quality.
+
+## STRICT PROHIBITIONS
+- No jewellery redesign.
+- No invented crystals or gemstones.
+- No missing or extra stones.
+- No colour changes.
+- No altered jewellery geometry.
+- No face replacement.
+- No artificial-looking skin.
+- No additional jewellery.
+- No text, logos, watermarks or graphic overlays.
+- No collage or multiple views.
+
+## FINAL OUTPUT
+Generate ONE single photorealistic image showing the original customer wearing the EXACT Zenzies ${itemNoun} from IMAGE 2.
+The final image must look like a real photograph of the customer wearing the actual physical product.
+
+PRIORITY ORDER:
+1. Exact jewellery identity and design preservation.
+2. Customer identity preservation.
+3. Accurate placement.
+4. Photorealistic integration.
+
+If perfect jewellery preservation conflicts with visual enhancement, ALWAYS prioritize preserving the original jewellery over visual enhancement.`;
+}
+
+/**
+ * Ensures an image (product or customer) is hosted on Higgsfield CloudFront CDN
+ * to prevent external ingestion failures.
+ */
+async function ensureHiggsfieldUrl(imageUrl, apiKey, apiSecret) {
+  if (!imageUrl) return null;
+  if (typeof imageUrl === "string" && imageUrl.includes("cloudfront.net")) {
+    return imageUrl;
+  }
+
+  try {
+    let buf;
+    let contentType = "image/jpeg";
+
+    if (imageUrl.startsWith("data:")) {
+      const match = imageUrl.match(/^data:([^;]+);base64,(.+)$/);
+      if (match) {
+        contentType = match[1];
+        buf = Buffer.from(match[2], "base64");
+      } else {
+        return imageUrl;
+      }
+    } else {
+      const imgRes = await fetch(imageUrl);
+      if (!imgRes.ok) return imageUrl;
+      contentType = imgRes.headers.get("content-type") || "image/jpeg";
+      buf = Buffer.from(await imgRes.arrayBuffer());
+    }
+
+    const upRes = await fetch("https://api.higgsfield.ai/files/generate-upload-url", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Key ${apiKey}:${apiSecret}`
+      },
+      body: JSON.stringify({ content_type: contentType })
+    });
+
+    if (!upRes.ok) return imageUrl;
+    const upData = await upRes.json();
+
+    const putRes = await fetch(upData.upload_url, {
+      method: "PUT",
+      headers: upData.upload_headers || {
+        "Content-Type": contentType,
+        "x-amz-tagging": "retention=temporary"
+      },
+      body: buf
+    });
+
+    if (putRes.ok) {
+      return upData.public_url;
+    }
+  } catch (err) {
+    console.warn("[Try-On API] ensureHiggsfieldUrl warning:", err.message);
+  }
+  return imageUrl;
 }
 
 export default async function handler(req, res) {
@@ -50,7 +194,7 @@ export default async function handler(req, res) {
 
     const {
       productId,
-      productName,
+      productName = "Zenzies Fine Jewellery",
       productCategory = "Earrings",
       productPrice,
       productImageUrl,
@@ -60,7 +204,7 @@ export default async function handler(req, res) {
       angle = "front"
     } = body || {};
 
-    const activeProductImage = productImageUrl || "https://res.cloudinary.com/luq2xhci/image/upload/v1794671384/customer_sample_portrait.png";
+    const rawProductImage = productImageUrl || "https://res.cloudinary.com/luq2xhci/image/upload/v1794671384/customer_sample_portrait.png";
 
     if (!customerPhotoUrl) {
       return res.status(400).json({
@@ -93,120 +237,90 @@ export default async function handler(req, res) {
     }
 
     const tryOnId = `tryon_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
-    const prompts = buildAnglePrompts(productName, productCategory, material);
-
+    const prompt = buildJewelleryTryOnPrompt(productName, productCategory, material, angle);
     const hfCredentials = process.env.HF_CREDENTIALS;
 
-    // ── LIVE HIGGSFIELD AI GENERATION MODE ────────────────────────────────
+    // ── LIVE HIGGSFIELD AI GENERATION ────────────────────────────────────
     if (hfCredentials && hfCredentials.includes(":")) {
-      try {
-        const [apiKey, apiSecret] = hfCredentials.split(":");
-        const hfResp = await fetch("https://api.higgsfield.ai/marketing-studio/image/flare", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Key ${apiKey}:${apiSecret}`
+      const [apiKey, apiSecret] = hfCredentials.split(":");
+
+      // Ensure both images are hosted on Higgsfield CloudFront CDN
+      const [validCustomerUrl, validProductUrl] = await Promise.all([
+        ensureHiggsfieldUrl(customerPhotoUrl, apiKey, apiSecret),
+        ensureHiggsfieldUrl(rawProductImage, apiKey, apiSecret)
+      ]);
+
+      const hfResp = await fetch("https://api.higgsfield.ai/marketing-studio/image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Key ${apiKey}:${apiSecret}`
+        },
+        body: JSON.stringify({
+          prompt,
+          image_urls: [validCustomerUrl, validProductUrl],
+          quality: "high",
+          resolution: "2k",
+          aspect_ratio: "auto",
+          enhance_prompt: false,
+          moderation: "auto"
+        })
+      });
+
+      if (hfResp.ok) {
+        const hfResult = await hfResp.json();
+        const requestId = hfResult.request_id || `hf_${Date.now()}`;
+        const initialStatus = hfResult.status || "in_progress";
+
+        return res.status(200).json({
+          success: true,
+          mode: "live",
+          tryOnId,
+          requestId,
+          status: initialStatus,
+          activeAngle: angle,
+          prompt,
+          customerPhotoUrl: validCustomerUrl,
+          product: {
+            id: productId,
+            name: productName,
+            category: productCategory,
+            price: productPrice,
+            image: validProductUrl
           },
-          body: JSON.stringify({
-            prompt: prompts[angle] || prompts.front,
-            image_urls: [activeProductImage, customerPhotoUrl],
-            quality: "high",
-            resolution: "2k",
-            aspect_ratio: "auto",
-            enhance_prompt: false,
-            moderation: "auto"
-          })
+          createdAt: new Date().toISOString()
         });
-
-        if (hfResp.ok) {
-          const hfResult = await hfResp.json();
-          const requestId = hfResult.request_id || `hf_${Date.now()}`;
-          const initialStatus = hfResult.status || "in_progress";
-
-          return res.status(200).json({
-            success: true,
-            mode: "live",
-            tryOnId,
-            requestId,
-            status: initialStatus,
-            activeAngle: angle,
-            prompts,
-            angles: {
-              front: {
-                status: angle === "front" ? initialStatus : "pending",
-                requestId: angle === "front" ? requestId : null,
-                imageUrl: hfResult.images?.[0]?.url || null
-              },
-              left: { status: "pending", requestId: null, imageUrl: null },
-              right: { status: "pending", requestId: null, imageUrl: null },
-              closeup: { status: "pending", requestId: null, imageUrl: null }
-            },
-            product: {
-              id: productId,
-              name: productName,
-              category: productCategory,
-              price: productPrice,
-              image: activeProductImage
-            },
-            customerPhotoUrl,
-            createdAt: new Date().toISOString()
-          });
-        } else {
-          const errText = await hfResp.text();
-          console.warn("[Try-On API] Higgsfield HTTP warning:", hfResp.status, errText);
-        }
-      } catch (hfError) {
-        console.error("[Try-On API] Higgsfield execution error:", hfError.message);
-        // If API fails due to rate limits or balance, fall through to high-fidelity simulation
+      } else {
+        const errText = await hfResp.text();
+        console.error("[Try-On API] Higgsfield error:", hfResp.status, errText);
+        return res.status(502).json({
+          success: false,
+          message: `AI try-on engine returned error (${hfResp.status}). Please try again shortly.`
+        });
       }
     }
 
-    // ── PROOF OF CONCEPT / HIGH-FIDELITY SIMULATION MODE ────────────────────
-    // If HF_CREDENTIALS is not configured or in sandbox testing:
-    // We return a high-fidelity result so the user can experience the complete
-    // 4-angle gallery, before/after toggle, add-to-cart, and photo replacement seamlessly.
-    const generatedAngles = {
-      front: {
-        status: "completed",
-        imageUrl: customerPhotoUrl || activeProductImage,
-        title: "Front View",
-        prompt: prompts.front
-      },
-      left: {
-        status: "completed",
-        imageUrl: customerPhotoUrl || activeProductImage,
-        title: "Left Angle",
-        prompt: prompts.left
-      },
-      right: {
-        status: "completed",
-        imageUrl: customerPhotoUrl || activeProductImage,
-        title: "Right Angle",
-        prompt: prompts.right
-      },
-      closeup: {
-        status: "completed",
-        imageUrl: activeProductImage,
-        title: "Close-up",
-        prompt: prompts.closeup
-      }
-    };
-
+    // ── FALLBACK FOR LOCAL DEV WITHOUT CREDENTIALS ───────────────────────
     return res.status(200).json({
       success: true,
       mode: "simulation",
       tryOnId,
       status: "completed",
-      activeAngle: "front",
-      angles: generatedAngles,
+      activeAngle: angle,
+      customerPhotoUrl,
+      angles: {
+        front: { status: "completed", imageUrl: customerPhotoUrl },
+        left: { status: "completed", imageUrl: customerPhotoUrl },
+        right: { status: "completed", imageUrl: customerPhotoUrl },
+        closeup: { status: "completed", imageUrl: customerPhotoUrl }
+      },
       product: {
         id: productId,
         name: productName,
         category: productCategory,
         price: productPrice,
-        image: activeProductImage
+        image: rawProductImage
       },
-      customerPhotoUrl,
       createdAt: new Date().toISOString()
     });
 
@@ -214,8 +328,7 @@ export default async function handler(req, res) {
     console.error("[Try-On API] create error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error starting virtual try-on session."
+      message: `Failed to initialize AI try-on: ${error.message}`
     });
   }
 }
-

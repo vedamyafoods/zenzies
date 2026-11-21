@@ -146,11 +146,14 @@ export async function uploadPhotoSecurely(file, productId) {
     if (signData.provider === "higgsfield" && signData.uploadUrl) {
       const uploadResp = await fetch(signData.uploadUrl, {
         method: "PUT",
-        headers: signData.headers || { "Content-Type": file.type },
+        headers: signData.headers || {
+          "Content-Type": file.type || "image/jpeg",
+          "x-amz-tagging": "retention=temporary"
+        },
         body: file
       });
       if (!uploadResp.ok) {
-        throw new Error("Direct storage upload failed.");
+        throw new Error(`Direct storage upload failed with status ${uploadResp.status}.`);
       }
       return signData.publicUrl;
     }
