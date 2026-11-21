@@ -222,7 +222,7 @@ export async function createTryOnSession({
  * Polls status of an active try-on request with honest stage progression
  */
 export async function pollTryOnStatus(requestId, tryOnId, onProgress) {
-  const maxPolls = 30; // 60 seconds max
+  const maxPolls = 60; // 120 seconds max
   let pollCount = 0;
 
   const stages = [
@@ -234,34 +234,51 @@ export async function pollTryOnStatus(requestId, tryOnId, onProgress) {
   ];
 
   while (pollCount < maxPolls) {
-    const currentStageIndex = Math.min(pollCount, stages.length - 1);
+    const currentStageIndex = Math.min(Math.floor(pollCount / 8), stages.length - 1);
     if (onProgress) {
       onProgress({
         stage: stages[currentStageIndex],
-        progressPercent: Math.min(95, 20 + pollCount * 18)
+        progressPercent: Math.min(95, 20 + pollCount * 3)
       });
     }
+
+    let statusData = null;
+    let fetchError = null;
 
     try {
       const res = await fetch(`/api/try-on/status?requestId=${encodeURIComponent(requestId)}&tryOnId=${encodeURIComponent(tryOnId)}`);
       if (res.ok) {
-        const data = await res.json();
-        if (data.status === "completed") {
-          if (onProgress) onProgress({ stage: "Finalizing your results...", progressPercent: 100 });
-          return data;
-        } else if (data.status === "failed" || data.status === "nsfw") {
-          throw new Error(data.error || "AI generation could not complete for this photo. Please try a different angle.");
-        }
+        statusData = await res.json();
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        fetchError = errJson.message || `Status check returned ${res.status}`;
       }
     } catch (e) {
-      console.warn("[TryOnService] Polling retry:", e.message);
+      fetchError = e.message;
+    }
+
+    // Handle transient network errors
+    if (fetchError) {
+      console.warn("[TryOnService] Transient polling error:", fetchError);
+    } else if (statusData) {
+      // Completed successfully
+      if (statusData.status === "completed") {
+        if (onProgress) onProgress({ stage: "Finalizing your results...", progressPercent: 100 });
+        return statusData;
+      }
+
+      // Fatal error from AI provider (e.g. low credits, moderation, or generation failure)
+      if (statusData.status === "failed" || statusData.status === "nsfw" || statusData.error) {
+        const errorMsg = statusData.error || (statusData.status === "nsfw" ? "Image moderation flag. Please upload a clear photo." : "AI generation could not be completed.");
+        throw new Error(errorMsg);
+      }
     }
 
     pollCount++;
     await new Promise((r) => setTimeout(r, 2000));
   }
 
-  // Timeout
-  throw new Error("Preview generation timed out. Please retry with a clearer photo.");
+  // Timeout after 120s
+  throw new Error("Preview generation took longer than expected. Please try again in a few moments.");
 }
 

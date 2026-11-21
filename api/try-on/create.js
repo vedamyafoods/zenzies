@@ -323,9 +323,13 @@ export default async function handler(req, res) {
     } else {
       const errText = await hfResp.text();
       console.error("[Try-On API] Higgsfield error:", hfResp.status, errText);
-      return res.status(502).json({
+      let userMessage = `AI try-on engine returned error (${hfResp.status}). Please try again shortly.`;
+      if (errText.includes("credit") || errText.includes("balance") || hfResp.status === 402 || hfResp.status === 403) {
+        userMessage = "Your Higgsfield AI credit balance is too low to complete this preview. Please top up your credits at higgsfield.ai.";
+      }
+      return res.status(hfResp.status).json({
         success: false,
-        message: `AI try-on engine returned error (${hfResp.status}). Please try again shortly.`
+        message: userMessage
       });
     }
 

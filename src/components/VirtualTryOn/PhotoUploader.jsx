@@ -20,7 +20,9 @@ const PhotoUploader = ({ onPhotoSelected, category = "Earrings" }) => {
     ? "Front-facing portrait • neck and collarbone visible • good lighting"
     : catLower.includes("ring")
     ? "Clear hand or finger photo • natural lighting • no blur"
-    : "Front-facing portrait • natural lighting • face clearly visible";
+    : catLower.includes("bracelet") || catLower.includes("bangle")
+    ? "Clear wrist or hand photo • resting naturally • good lighting"
+    : "Front-facing portrait • natural lighting • target wearing area visible";
 
   const processFile = async (file) => {
     if (!file) return;
